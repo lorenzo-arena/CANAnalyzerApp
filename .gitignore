@@ -1,0 +1,10 @@
+# Ignoro la cartella delle impostazioni di VS
+.vs/
+
+# Ignoro le cartelle di compilazione
+CANAnalyzerApp/CANAnalyzerApp/bin/
+CANAnalyzerApp/CANAnalyzerApp/obj/
+CANAnalyzerApp/CANAnalyzerApp.Android/bin/
+CANAnalyzerApp/CANAnalyzerApp.Android/obj/
+CANAnalyzerApp/CANAnalyzerApp.iOS/bin/
+CANAnalyzerApp/CANAnalyzerApp.iOS/obj/
