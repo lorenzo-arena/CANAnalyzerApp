@@ -1,15 +1,18 @@
 ﻿using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using CANAnalyzerApp.Views;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace CANAnalyzerApp
 {
     public partial class App : Application
     {
+
         public App()
         {
             InitializeComponent();
+
 
             MainPage = new MainPage();
         }
