@@ -2,16 +2,35 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CANAnalyzerApp.Views.MenuPage"
-             Title="Menu">
-    <StackLayout VerticalOptions="FillAndExpand">
+             xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core" 
+    ios:Page.UseSafeArea="true"
+             Title="Menu"
+             BackgroundColor="#282828">
+    <StackLayout
+        BackgroundColor="#282828">
         <ListView x:Name="ListViewMenu"
-                    HasUnevenRows="True">
+              SeparatorVisibility="None"
+              HasUnevenRows="true"
+              BackgroundColor="#282828">
+            <ListView.Header>
+                <Grid BackgroundColor="#282828">
+                    <Label
+                      Text="CAN Analyzer"
+                      TextColor="#F0F0F0"
+                      FontSize="28"
+                      Margin="40,40,0,40"/>   
+                </Grid>
+            </ListView.Header>
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
-                        <Grid Padding="10">
-                            <Label Text="{Binding Title}" FontSize="20"/>
-                        </Grid>
+                        <StackLayout Padding="15,10" HorizontalOptions="FillAndExpand">
+                            <Label VerticalOptions="FillAndExpand" 
+                    VerticalTextAlignment="Center" 
+                    Text="{Binding Title}" 
+                    FontSize="20"
+                    TextColor="{Binding Foreground}"/>
+                        </StackLayout>
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
