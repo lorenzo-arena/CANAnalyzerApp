@@ -18,8 +18,9 @@ namespace CANAnalyzerApp.Views
 
             menuItems = new List<HomeMenuItem>
             {
-                new HomeMenuItem {Id = MenuItemType.Browse, Title="Browse" },
-                new HomeMenuItem {Id = MenuItemType.About, Title="About" }
+                new HomeMenuItem {Id = MenuItemType.CANSpyOne, Title="CAN Line 1", Foreground = Color.FromHex("#282828") },
+                new HomeMenuItem {Id = MenuItemType.CANSpyTwo, Title="CAN Line 2", Foreground = Color.FromHex("#F0F0F0") },
+                new HomeMenuItem {Id = MenuItemType.KLineSpy, Title="K Line", Foreground = Color.FromHex("#F0F0F0") }
             };
 
             ListViewMenu.ItemsSource = menuItems;
@@ -30,9 +31,23 @@ namespace CANAnalyzerApp.Views
                 if (e.SelectedItem == null)
                     return;
 
+                // Imposto il foreground della voce selezionata in grigio
+                // e tutte le altre in bianco per ripristinare la precedente
+
+                foreach(HomeMenuItem item in menuItems)
+                {
+                    if(item == (HomeMenuItem)e.SelectedItem)
+                        item.Foreground = Color.FromHex("#282828");
+                    else
+                        item.Foreground = Color.FromHex("#F0F0F0");
+                }
+
+                ListViewMenu.ItemsSource = null;
+                ListViewMenu.ItemsSource = menuItems;
+
                 var id = (int)((HomeMenuItem)e.SelectedItem).Id;
                 await RootPage.NavigateFromMenu(id);
-            };
+            }; 
         }
     }
 }

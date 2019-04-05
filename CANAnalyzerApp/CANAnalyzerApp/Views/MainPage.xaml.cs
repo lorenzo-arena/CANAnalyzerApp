@@ -17,7 +17,7 @@ namespace CANAnalyzerApp.Views
 
             MasterBehavior = MasterBehavior.Popover;
 
-            MenuPages.Add((int)MenuItemType.Browse, (NavigationPage)Detail);
+            MenuPages.Add((int)MenuItemType.CANSpyOne, (NavigationPage)Detail);
         }
 
         public async Task NavigateFromMenu(int id)
@@ -26,11 +26,29 @@ namespace CANAnalyzerApp.Views
             {
                 switch (id)
                 {
-                    case (int)MenuItemType.Browse:
-                        MenuPages.Add(id, new NavigationPage(new ItemsPage()));
+                    case (int)MenuItemType.CANSpyOne:
+                    case (int)MenuItemType.CANSpyTwo:
+                        var CANPage = new CANSpyPage();
+
+                        if (id == (int)MenuItemType.CANSpyOne)
+                            CANPage.Title = "CAN Line 1";
+                        else if (id == (int)MenuItemType.CANSpyTwo)
+                            CANPage.Title = "CAN Line 2";
+
+                        var CANNavPage = new NavigationPage(CANPage);
+                        CANNavPage.BarBackgroundColor = Color.FromHex("#282828");
+
+                        MenuPages.Add(id, CANNavPage);
                         break;
-                    case (int)MenuItemType.About:
-                        MenuPages.Add(id, new NavigationPage(new AboutPage()));
+                    // TEMPORANEO
+                    case (int)MenuItemType.KLineSpy:
+                        var KPage = new CANSpyPage();
+                        KPage.Title = "K Line";
+
+                        var KNavPage = new NavigationPage(KPage);
+                        KNavPage.BarBackgroundColor = Color.FromHex("#282828");
+
+                        MenuPages.Add(id, KNavPage);
                         break;
                 }
             }

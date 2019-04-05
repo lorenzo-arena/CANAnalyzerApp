@@ -28,6 +28,13 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref title, value); }
         }
 
+        Color barBackgroundColor = Color.FromHex("#282828");
+        public Color BarBackgroundColor
+        {
+            get { return barBackgroundColor; }
+            set { SetProperty(ref barBackgroundColor, value); }
+        }
+
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName]string propertyName = "",
             Action onChanged = null)
