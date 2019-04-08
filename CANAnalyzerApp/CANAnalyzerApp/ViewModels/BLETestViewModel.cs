@@ -2,19 +2,42 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using Xamarin.Forms;
 
 using CANAnalyzerApp.Models;
 using CANAnalyzerApp.Views;
 
+using Plugin.BLE.Abstractions.Contracts;
+using Plugin.BLE.Abstractions.Exceptions;
+using System.Windows.Input;
+
 namespace CANAnalyzerApp.ViewModels
 {
-    public class CANSpyViewModel : BaseViewModel
+    public class BLETestViewModel : BaseViewModel
     {
-        public CANSpyViewModel()
+        public ICommand ConnectCommand { get; }
+        public ICommand TestCommand { get; }
+
+        public BLETestViewModel()
         {
-            Title = "CAN Spy 1";
+            Title = "BLE Test";
+
+            ConnectCommand = new Command(async () => {
+                if (await AnalyzerDevice.ConnectToDeviceAsync())
+                    MessagingCenter.Send(this, "DeviceConnectedOk");
+                else
+                    MessagingCenter.Send(this, "DeviceConnectedFailed");
+
+            });
+
+            TestCommand = new Command(async () => {
+                if (await AnalyzerDevice.TestCommandAsync())
+                    MessagingCenter.Send(this, "DeviceTestOk");
+                else
+                    MessagingCenter.Send(this, "DeviceTestFailed");
+            });
         }
     }
 
@@ -67,13 +90,6 @@ namespace CANAnalyzerApp.ViewModels
             await Navigation.PopModalAsync();
         }
     }
-
-    // Poi nel costruttore del viewModel che vuole questo evento
-    MessagingCenter.Subscribe<NewItemPage, Item>(this, "AddItem", async (obj, item) =>
-    {
-        var newItem = item as Item;
-        Items.Add(newItem);
-        await DataStore.AddItemAsync(newItem);
-    });
     */
 }
+ 

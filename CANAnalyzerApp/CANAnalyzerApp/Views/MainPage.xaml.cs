@@ -50,6 +50,16 @@ namespace CANAnalyzerApp.Views
 
                         MenuPages.Add(id, KNavPage);
                         break;
+                    case (int)MenuItemType.BLETest:
+                        var BLEPage = new BLETestPage();
+                        BLEPage.Title = "BLE Test";
+
+                        var BLENavPage = new NavigationPage(BLEPage);
+                        BLENavPage.BarBackgroundColor = Color.FromHex("#282828");
+
+                        MenuPages.Add(id, BLENavPage);
+                        break;
+
                 }
             }
 

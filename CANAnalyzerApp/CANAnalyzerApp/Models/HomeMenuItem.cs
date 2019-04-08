@@ -9,13 +9,15 @@ namespace CANAnalyzerApp.Models
     {
         CANSpyOne,
         CANSpyTwo,
-        KLineSpy
+        KLineSpy,
+        BLETest
     }
     public class HomeMenuItem
     {
         public MenuItemType Id { get; set; }
 
         public string Title { get; set; }
+
         public Color Foreground { get; set; }
     }
 }

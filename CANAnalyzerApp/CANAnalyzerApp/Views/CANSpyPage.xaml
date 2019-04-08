@@ -2,8 +2,8 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CANAnalyzerApp.Views.CANSpyPage"
-             xmlns:vm="clr-namespace:CANAnalyzerApp.ViewModels"
-             Title="{Binding Title}">
+             Title="{Binding Title}"
+             BackgroundColor="#282828">
 
     <ContentPage.Resources>
         <ResourceDictionary>
