@@ -14,6 +14,9 @@ namespace CANAnalyzerApp.Services
         private const string AnalyzerCharacteristic = "ffe1";
         private List<ICharacteristic> characteristics;
         private bool connected = false;
+
+        private const string frameHeader = "DSCA";
+        private const int initFrameLength = 12;
   
         public async Task<bool> ConnectToDeviceAsync()
         {
@@ -69,10 +72,77 @@ namespace CANAnalyzerApp.Services
                 return await Task.FromResult(false);
             else
             {
-                ICharacteristic testChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
+                ICharacteristic analyzerChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
 
-                if (testChar != null)
-                    await testChar.WriteAsync(Encoding.ASCII.GetBytes("testtest"));
+                if (analyzerChar != null)
+                {
+                    await SendInitCommand(4);
+
+                    byte[] frame = new byte[12];
+
+                    const UInt32 testCommand = 0x3F3F3F3F;
+
+                    // Imposto l'header
+                    Encoding.ASCII.GetBytes(frameHeader).CopyTo(frame, 0);
+
+                    // Copio la lunghezza del messaggio da inviare successivamente
+
+                    frame[4] = (byte)((testCommand & 0xFF000000) >> 24);
+                    frame[5] = (byte)((testCommand & 0x00FF0000) >> 16);
+                    frame[6] = (byte)((testCommand & 0x0000FF00) >> 8);
+                    frame[7] = (byte)(testCommand & 0x000000FF);
+
+                    UInt32 crc = Crc32_STM.CalculateBuffer(frame, 12 - 4);
+
+                    // Copio la lunghezza del messaggio da inviare successivamente
+                    frame[8] = (byte)((crc & 0xFF000000) >> 24);
+                    frame[9] = (byte)((crc & 0x00FF0000) >> 16);
+                    frame[10] = (byte)((crc & 0x0000FF00) >> 8);
+                    frame[11] = (byte)(crc & 0x000000FF);
+
+                    await analyzerChar.WriteAsync(frame);
+                }
+                else
+                    return await Task.FromResult(false);
+            }
+
+            return await Task.FromResult(true);
+        }
+
+        // Invia il frame di start della comunicazione
+        // indicando la lunghezza del frame successivo
+        // compresi la dimensione dell'header e del CRC finale
+        public async Task<bool> SendInitCommand(UInt32 nextLength)
+        {
+            if (!connected)
+                return await Task.FromResult(false);
+            else
+            {
+                ICharacteristic analyzerChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
+
+                if (analyzerChar != null)
+                {
+                    byte[] frame = new byte[initFrameLength];
+
+                    // Imposto l'header
+                    Encoding.ASCII.GetBytes(frameHeader).CopyTo(frame, 0);
+
+                    // Copio la lunghezza del messaggio da inviare successivamente
+                    frame[4] = (byte)((nextLength & 0xFF000000) >> 24);
+                    frame[5] = (byte)((nextLength & 0x00FF0000) >> 16);
+                    frame[6] = (byte)((nextLength & 0x0000FF00) >> 8);
+                    frame[7] = (byte)(nextLength & 0x000000FF);
+
+                    UInt32 crc = Crc32_STM.CalculateBuffer(frame, initFrameLength - 4);
+
+                    // Copio la lunghezza del messaggio da inviare successivamente
+                    frame[8] = (byte)((crc & 0xFF000000) >> 24);
+                    frame[9] = (byte)((crc & 0x00FF0000) >> 16);
+                    frame[10] = (byte)((crc & 0x0000FF00) >> 8);
+                    frame[11] = (byte)(crc & 0x000000FF);
+
+                    await analyzerChar.WriteAsync(frame);
+                }
                 else
                     return await Task.FromResult(false);
             }
