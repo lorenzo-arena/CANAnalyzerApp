@@ -89,13 +89,13 @@
     <BundleResource Include="Resources\xamarin_logo.png" />
     <BundleResource Include="Resources\xamarin_logo%402x.png" />
     <BundleResource Include="Resources\xamarin_logo%403x.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-1024.png">
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-10241.png">
       <Visible>false</Visible>
     </ImageAsset>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-120.png">
       <Visible>false</Visible>
     </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-1201.png">
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-1202.png">
       <Visible>false</Visible>
     </ImageAsset>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-152.png">
@@ -116,16 +116,16 @@
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-40.png">
       <Visible>false</Visible>
     </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-401.png">
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-403.png">
       <Visible>false</Visible>
     </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-402.png">
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-404.png">
       <Visible>false</Visible>
     </ImageAsset>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-58.png">
       <Visible>false</Visible>
     </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-581.png">
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-582.png">
       <Visible>false</Visible>
     </ImageAsset>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-60.png">
@@ -137,7 +137,7 @@
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-80.png">
       <Visible>false</Visible>
     </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-801.png">
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-802.png">
       <Visible>false</Visible>
     </ImageAsset>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-87.png">
