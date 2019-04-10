@@ -1,23 +1,111 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CANAnalyzerApp.Views.CANSpyPage"
-             Title="{Binding Title}"
-             BackgroundColor="#282828">
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            x:Class="CANAnalyzerApp.Views.CANSpyPage"
+            xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
+            Title="{Binding Title}"
+            BackgroundColor="{StaticResource BackgroundColor}"
+            BarBackgroundColor="{StaticResource BackgroundColor}"
+            BarTextColor="{StaticResource ForegroundLightColor}">
 
-    <ContentPage.Resources>
+    <TabbedPage.Resources>
         <ResourceDictionary>
             <!--Page Level Resources: Compatible with Xamarin Live Player -->
-            <Color x:Key="Primary">#2196F3</Color>
-            <Color x:Key="Accent">#96d1ff</Color>
-            <Color x:Key="LightTextColor">#999999</Color>
+            <Color x:Key="BackgroundColor">#282828</Color>
+            <Color x:Key="LightBackgroundColor">#858585</Color>
+            <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
+            <Color x:Key="ForegroundDarkColor">#101010</Color>
+            <Color x:Key="LogoColor">#DE0000</Color>
         </ResourceDictionary>
-    </ContentPage.Resources>
+    </TabbedPage.Resources>
 
-    <Grid>
+    <ContentPage Title="Controls">
         <StackLayout>
-            <Label>Test</Label>
-            <Entry Placeholder="Provaprova"></Entry>
+            <Button Text="Start" VerticalOptions="CenterAndExpand"></Button>
+            <Button Text="Stop" VerticalOptions="CenterAndExpand"></Button>
+            <Button Text="Refresh" VerticalOptions="CenterAndExpand"></Button>
         </StackLayout>
-    </Grid>
-</ContentPage>
+    </ContentPage>
+    <ContentPage x:Name="CANSettings" Title="Settings">
+        <StackLayout>
+            <TableView Intent="Settings">
+                <TableRoot>
+                    <TableSection Title="CAN Settings">
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Bit Timing"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Picker Title="Bit Timing"
+                                 HorizontalOptions="EndAndExpand"
+                                 Margin="0,5,15,5"
+                                        WidthRequest="150"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Sampling Point"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Picker Title="Sampling Point"
+                                 HorizontalOptions="EndAndExpand"
+                                 Margin="0,5,15,5"
+                                 WidthRequest="150"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Frame Format"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Picker Title="Frame Format"
+                                 HorizontalOptions="EndAndExpand"
+                                 Margin="0,5,15,5"
+                                 WidthRequest="150"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <SwitchCell Text="Error Reception"/>
+                        <SwitchCell Text="Apply Mask and ID"/>
+                        <EntryCell Label="Mask" Placeholder="Mask (Hex)"></EntryCell>
+                        <EntryCell Label="ID" Placeholder="ID (Hex)"></EntryCell>
+                    </TableSection>
+                </TableRoot>
+            </TableView>
+        </StackLayout>
+    </ContentPage>
+    <ContentPage Title="Monitor">
+        <StackLayout Margin="30">
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+            <Label Text="First Frame"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"></Label>
+        </StackLayout>
+    </ContentPage>
+    
+</TabbedPage>

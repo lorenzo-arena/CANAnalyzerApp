@@ -14,7 +14,7 @@ using CANAnalyzerApp.ViewModels;
 namespace CANAnalyzerApp.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class CANSpyPage : ContentPage
+    public partial class CANSpyPage : TabbedPage
     {
         CANSpyViewModel viewModel;
 
