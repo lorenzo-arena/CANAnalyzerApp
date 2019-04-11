@@ -4,9 +4,7 @@
             x:Class="CANAnalyzerApp.Views.CANSpyPage"
             xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
             Title="{Binding Title}"
-            BackgroundColor="{StaticResource BackgroundColor}"
-            BarBackgroundColor="{StaticResource BackgroundColor}"
-            BarTextColor="{StaticResource ForegroundLightColor}">
+            BackgroundColor="{StaticResource BackgroundColor}">
 
     <TabbedPage.Resources>
         <ResourceDictionary>
@@ -20,13 +18,79 @@
     </TabbedPage.Resources>
 
     <ContentPage Title="Controls">
-        <StackLayout>
-            <Button Text="Start" VerticalOptions="CenterAndExpand"></Button>
-            <Button Text="Stop" VerticalOptions="CenterAndExpand"></Button>
-            <Button Text="Refresh" VerticalOptions="CenterAndExpand"></Button>
-        </StackLayout>
+        <RelativeLayout>
+            <Button Text="Start"
+                    RelativeLayout.XConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Width,
+                    Factor=0.2}"
+                    RelativeLayout.YConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Height,
+                    Factor=0.05}"
+                    RelativeLayout.WidthConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Width,
+                    Factor=0.25}"
+                    RelativeLayout.HeightConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Height,
+                    Factor=0.05}"></Button>
+            <Button Text="Stop"
+                    RelativeLayout.XConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Width,
+                    Factor=0.55}"
+                    RelativeLayout.YConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Height,
+                    Factor=0.05}"
+                    RelativeLayout.WidthConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Width,
+                    Factor=0.25}"
+                    RelativeLayout.HeightConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Height,
+                    Factor=0.05}"></Button>
+            <Label RelativeLayout.XConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Width,
+                   Factor=0.1}"
+                   RelativeLayout.YConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Height,
+                   Factor=0.15}"
+                   RelativeLayout.WidthConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Width,
+                   Factor=0.8}"
+                   RelativeLayout.HeightConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Height,
+                   Factor=0.05}"
+                   Text="Line Monitor:"></Label>
+            <Editor InputTransparent="True"
+                    Text=""
+                    RelativeLayout.XConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Width,
+                    Factor=0.1}"
+                    RelativeLayout.YConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Height,
+                    Factor=0.2}"
+                    RelativeLayout.WidthConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Width,
+                    Factor=0.8}"
+                    RelativeLayout.HeightConstraint = "{ConstraintExpression 
+                    Type=RelativeToParent,
+                    Property=Height,
+                    Factor=0.75}"></Editor>
+        </RelativeLayout>
     </ContentPage>
-    <ContentPage x:Name="CANSettings" Title="Settings">
+    <ContentPage Title="Settings">
         <StackLayout>
             <TableView Intent="Settings">
                 <TableRoot>
@@ -73,39 +137,4 @@
             </TableView>
         </StackLayout>
     </ContentPage>
-    <ContentPage Title="Monitor">
-        <StackLayout Margin="30">
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-            <Label Text="First Frame"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="CenterAndExpand"></Label>
-        </StackLayout>
-    </ContentPage>
-    
 </TabbedPage>

@@ -6,20 +6,39 @@
     ios:Page.UseSafeArea="true"
              Title="Menu"
              BackgroundColor="#282828">
-    <StackLayout
-        BackgroundColor="#282828">
+    <RelativeLayout>
         <ListView x:Name="ListViewMenu"
-              SeparatorVisibility="None"
-              HasUnevenRows="true"
-              BackgroundColor="#282828">
+              SeparatorVisibility="None"     
+              HasUnevenRows="False"
+              BackgroundColor="#282828"
+              RelativeLayout.XConstraint = "{ConstraintExpression 
+                Type=RelativeToParent,
+                Property=Width,
+                Factor=0}"
+              RelativeLayout.YConstraint = "{ConstraintExpression 
+                Type=RelativeToParent,
+                Property=Height,
+                Factor=0}"
+              RelativeLayout.WidthConstraint = "{ConstraintExpression 
+                Type=RelativeToParent,
+                Property=Width,
+                Factor=1}"
+              RelativeLayout.HeightConstraint = "{ConstraintExpression 
+                Type=RelativeToParent,
+                Property=Height,
+                Factor=1}">
             <ListView.Header>
-                <Grid BackgroundColor="#282828">
-                    <Label
-                      Text="CAN Analyzer"
-                      TextColor="#F0F0F0"
-                      FontSize="28"
-                      Margin="40,40,0,40"/>   
-                </Grid>
+                <StackLayout>
+                    <Image Source="SplashScreenLogo.png"
+                           HorizontalOptions="CenterAndExpand"
+                           WidthRequest="100"></Image>
+                    <Label Text="CAN Analyzer"
+                           TextColor="#F0F0F0"
+                           FontSize="28"
+                           HorizontalOptions="CenterAndExpand"
+                           Margin="0,0,0,20"
+                           />   
+                </StackLayout>
             </ListView.Header>
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -35,5 +54,5 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-    </StackLayout>
+    </RelativeLayout>
 </ContentPage>
