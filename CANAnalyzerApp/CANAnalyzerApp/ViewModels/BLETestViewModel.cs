@@ -29,7 +29,6 @@ namespace CANAnalyzerApp.ViewModels
                     MessagingCenter.Send(this, "DeviceConnectedOk");
                 else
                     MessagingCenter.Send(this, "DeviceConnectedFailed");
-
             });
 
             TestCommand = new Command(async () => {

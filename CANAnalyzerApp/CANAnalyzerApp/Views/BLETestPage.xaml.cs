@@ -34,11 +34,6 @@ namespace CANAnalyzerApp.Views
                 await DisplayAlert("CANAnalyzer", "Connessioni fallita.", "Ok");
             });
 
-            MessagingCenter.Subscribe<BLETestViewModel>(this, "DeviceTestOk", async (obj) =>
-            {
-                await DisplayAlert("CANAnalyzer", "Test ok.", "Ok");
-            });
-
             MessagingCenter.Subscribe<BLETestViewModel>(this, "DeviceTestFailed", async (obj) =>
             {
                 await DisplayAlert("CANAnalyzer", "Test fallito.", "Ok");

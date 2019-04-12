@@ -23,6 +23,9 @@ namespace CANAnalyzerApp.Services
 
     public interface IAnalyzerDevice
     {
+        bool IsConnecting();
+        bool IsConnected();
+
         Task<bool> ConnectToDeviceAsync();
         Task<bool> TestCommandAsync();
         Task<bool> SetCANParametersAsync(CANParam param);

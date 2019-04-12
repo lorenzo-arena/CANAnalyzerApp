@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:app="clr-namespace:CANAnalyzerApp"
+             x:Class="CANAnalyzerApp.Views.DeviceSettingsPage">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!--Page Level Resources: Compatible with Xamarin Live Player -->
+            <Color x:Key="BackgroundColor">#282828</Color>
+            <Color x:Key="LightBackgroundColor">#858585</Color>
+            <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
+            <Color x:Key="ForegroundDarkColor">#101010</Color>
+            <Color x:Key="LogoColor">#DE0000</Color>
+            <app:NegateBooleanConverter x:Key="inverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.Content>
+        <StackLayout>
+            <Button Margin="0,30,0,0"
+                    Text="Connect Device"
+                    Command="{Binding ConnectCommand}"
+                    IsEnabled="{Binding IsConnected, Converter={StaticResource inverter}}"/>
+            <ActivityIndicator IsVisible="{Binding IsConnecting}"
+                               IsRunning="{Binding IsConnecting}"
+                               Color="{StaticResource LogoColor}"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -28,6 +28,7 @@ namespace CANAnalyzerApp.Views
                 {
                     case (int)MenuItemType.CANSpyOne:
                     case (int)MenuItemType.CANSpyTwo:
+                    {
                         var CANPage = new CANSpyPage();
 
                         if (id == (int)MenuItemType.CANSpyOne)
@@ -40,9 +41,11 @@ namespace CANAnalyzerApp.Views
 
                         MenuPages.Add(id, CANNavPage);
                         break;
-                    // TEMPORANEO
+                    }
+
                     case (int)MenuItemType.KLineSpy:
-                        var KPage = new CANSpyPage();
+                    {
+                        var KPage = new KSpyPage();
                         KPage.Title = "K Line";
 
                         var KNavPage = new NavigationPage(KPage);
@@ -50,7 +53,22 @@ namespace CANAnalyzerApp.Views
 
                         MenuPages.Add(id, KNavPage);
                         break;
+                    }
+
+                    case (int)MenuItemType.DeviceSettings:
+                    {
+                        var SettingsPage = new DeviceSettingsPage();
+                        SettingsPage.Title = "Device Settings";
+
+                        var SettingsNavPage = new NavigationPage(SettingsPage);
+                        SettingsNavPage.BarBackgroundColor = Color.FromHex("#282828");
+
+                        MenuPages.Add(id, SettingsNavPage);
+                        break;
+                    }
+
                     case (int)MenuItemType.BLETest:
+                    {
                         var BLEPage = new BLETestPage();
                         BLEPage.Title = "BLE Test";
 
@@ -59,7 +77,7 @@ namespace CANAnalyzerApp.Views
 
                         MenuPages.Add(id, BLENavPage);
                         break;
-
+                    }
                 }
             }
 

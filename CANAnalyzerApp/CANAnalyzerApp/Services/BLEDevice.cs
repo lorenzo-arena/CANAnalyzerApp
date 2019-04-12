@@ -12,36 +12,58 @@ namespace CANAnalyzerApp.Services
     {
         private const string DeviceName = "CANAnalyzer";
         private const string AnalyzerCharacteristic = "ffe1";
-        private List<ICharacteristic> characteristics;
-        private bool connected = false;
+        private List<ICharacteristic> characteristics = new List<ICharacteristic>();
 
         private const string frameHeader = "DSCA";
         private const int initFrameLength = 12;
-  
+
+        private bool isConnected = false;
+        private bool isConnecting = false;
+
+        public BLEDevice()
+        {
+
+        }
+
+        public bool IsConnected()
+        {
+            return isConnected;
+        }
+
+        public bool IsConnecting()
+        {
+            return isConnecting;
+        }
+
         public async Task<bool> ConnectToDeviceAsync()
         {
             var ble = CrossBluetoothLE.Current;
             var adapter = CrossBluetoothLE.Current.Adapter;
             List<IDevice> deviceList = new List<IDevice>();
 
+            isConnecting = true;
+
             adapter.DeviceDiscovered += (s, a) => deviceList.Add(a.Device);
             await adapter.StartScanningForDevicesAsync();
 
-            IDevice nos3Device = deviceList.Find(x => x.Name == DeviceName);
+            IDevice device = deviceList.Find(x => x.Name == DeviceName);
 
             try
             {
-                await adapter.ConnectToDeviceAsync(nos3Device);
-                List<IService> services = (List<IService>)await nos3Device.GetServicesAsync();
+                await adapter.ConnectToDeviceAsync(device);
+                List<IService> services = (List<IService>)await device.GetServicesAsync();
                 characteristics = (List<ICharacteristic>)await services[1].GetCharacteristicsAsync();
-                connected = true;
+                isConnected = true;
             }
             catch (Exception e)
             {
                 // ... could not connect to device
-                connected = false;
+                isConnected = false;
+                isConnecting = false;
                 return await Task.FromResult(false);
             }
+
+            isConnecting = false;
 
             return await Task.FromResult(true);
         }
@@ -68,43 +90,11 @@ namespace CANAnalyzerApp.Services
 
         public async Task<bool> TestCommandAsync()
         {
-            if (!connected)
-                return await Task.FromResult(false);
-            else
-            {
-                ICharacteristic analyzerChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
+            const UInt32 testCommand = 0x3F3F3F3F;
 
-                if (analyzerChar != null)
-                {
-                    await SendInitCommand(4);
+            await SendInitCommand(4);
 
-                    byte[] frame = new byte[12];
-
-                    const UInt32 testCommand = 0x3F3F3F3F;
-
-                    // Imposto l'header
-                    Encoding.ASCII.GetBytes(frameHeader).CopyTo(frame, 0);
-
-                    // Copio la lunghezza del messaggio da inviare successivamente
-
-                    frame[4] = (byte)((testCommand & 0xFF000000) >> 24);
-                    frame[5] = (byte)((testCommand & 0x00FF0000) >> 16);
-                    frame[6] = (byte)((testCommand & 0x0000FF00) >> 8);
-                    frame[7] = (byte)(testCommand & 0x000000FF);
-
-                    UInt32 crc = Crc32_STM.CalculateBuffer(frame, 12 - 4);
-
-                    // Copio la lunghezza del messaggio da inviare successivamente
-                    frame[8] = (byte)((crc & 0xFF000000) >> 24);
-                    frame[9] = (byte)((crc & 0x00FF0000) >> 16);
-                    frame[10] = (byte)((crc & 0x0000FF00) >> 8);
-                    frame[11] = (byte)(crc & 0x000000FF);
-
-                    await analyzerChar.WriteAsync(frame);
-                }
-                else
-                    return await Task.FromResult(false);
-            }
+            await SendCommand(testCommand, 4);
 
             return await Task.FromResult(true);
         }
@@ -114,7 +104,7 @@ namespace CANAnalyzerApp.Services
         // compresi la dimensione dell'header e del CRC finale
         public async Task<bool> SendInitCommand(UInt32 nextLength)
         {
-            if (!connected)
+            if (!isConnected)
                 return await Task.FromResult(false);
             else
             {
@@ -132,6 +122,57 @@ namespace CANAnalyzerApp.Services
                     frame[5] = (byte)((nextLength & 0x00FF0000) >> 16);
                     frame[6] = (byte)((nextLength & 0x0000FF00) >> 8);
                     frame[7] = (byte)(nextLength & 0x000000FF);
+
+                    UInt32 crc = Crc32_STM.CalculateBuffer(frame, initFrameLength - 4);
+
+                    // Copio la lunghezza del messaggio da inviare successivamente
+                    frame[8] = (byte)((crc & 0xFF000000) >> 24);
+                    frame[9] = (byte)((crc & 0x00FF0000) >> 16);
+                    frame[10] = (byte)((crc & 0x0000FF00) >> 8);
+                    frame[11] = (byte)(crc & 0x000000FF);
+
+                    await analyzerChar.WriteAsync(frame);
+
+                    var response1 = await analyzerChar.ReadAsync();
+                    var response2 = await analyzerChar.ReadAsync();
+                    var response3 = await analyzerChar.ReadAsync();
+                    var response4 = await analyzerChar.ReadAsync();
+                    var response5 = await analyzerChar.ReadAsync();
+                    var response6 = await analyzerChar.ReadAsync();
+                    var response7 = await analyzerChar.ReadAsync();
+                    var response8 = await analyzerChar.ReadAsync();
+                    var response9 = await analyzerChar.ReadAsync();
+
+                    int pinco = 0;
+                    pinco = 1;
+                }
+                else
+                    return await Task.FromResult(false);
+            }
+
+            return await Task.FromResult(true);
+        }
+
+        public async Task<bool> SendCommand(UInt32 command, UInt32 length)
+        {
+            if (!isConnected)
+                return await Task.FromResult(false);
+            else
+            {
+                ICharacteristic analyzerChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
+
+                if (analyzerChar != null)
+                {
+                    byte[] frame = new byte[8 + length];
+
+                    // Imposto l'header
+                    Encoding.ASCII.GetBytes(frameHeader).CopyTo(frame, 0);
+
+                    // Copio la lunghezza del messaggio da inviare successivamente
+                    frame[4] = (byte)((command & 0xFF000000) >> 24);
+                    frame[5] = (byte)((command & 0x00FF0000) >> 16);
+                    frame[6] = (byte)((command & 0x0000FF00) >> 8);
+                    frame[7] = (byte)(command & 0x000000FF);
 
                     UInt32 crc = Crc32_STM.CalculateBuffer(frame, initFrameLength - 4);
 

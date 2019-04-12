@@ -10,6 +10,7 @@ namespace CANAnalyzerApp.Models
         CANSpyOne,
         CANSpyTwo,
         KLineSpy,
+        DeviceSettings,
         BLETest
     }
     public class HomeMenuItem
