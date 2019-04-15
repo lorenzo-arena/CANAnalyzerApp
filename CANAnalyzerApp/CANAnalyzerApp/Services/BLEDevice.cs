@@ -8,8 +8,20 @@ using System.Threading.Tasks;
 
 namespace CANAnalyzerApp.Services
 {
-    class BLEDevice : IAnalyzerDevice
+    public sealed class BLEDevice : IAnalyzerDevice
     {
+        public static BLEDevice Instance { get; } = new BLEDevice();
+
+        static BLEDevice()
+        {
+
+        }
+
+        private BLEDevice()
+        {
+
+        }        
+
         private const string DeviceName = "CANAnalyzer";
         private const string AnalyzerCharacteristic = "ffe1";
         private List<ICharacteristic> characteristics = new List<ICharacteristic>();
@@ -19,11 +31,6 @@ namespace CANAnalyzerApp.Services
 
         private bool isConnected = false;
         private bool isConnecting = false;
-
-        public BLEDevice()
-        {
-
-        }
 
         public bool IsConnected()
         {
