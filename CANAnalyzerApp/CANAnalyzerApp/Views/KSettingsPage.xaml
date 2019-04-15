@@ -2,8 +2,22 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:CANAnalyzerApp.Views"
+             xmlns:app="clr-namespace:CANAnalyzerApp"
              x:Class="CANAnalyzerApp.Views.KSettingsPage"
              Title="Settings">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!--Page Level Resources: Compatible with Xamarin Live Player -->
+            <Color x:Key="BackgroundColor">#282828</Color>
+            <Color x:Key="LightBackgroundColor">#858585</Color>
+            <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
+            <Color x:Key="ForegroundDarkColor">#101010</Color>
+            <Color x:Key="LogoColor">#DE0000</Color>
+            <app:ColorFromBooleanConverter x:Key="colorConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
     <ContentPage.Content>
         <StackLayout>
             <TableView Intent="Settings">
@@ -29,14 +43,17 @@
                                 <Label Text="Parity Type"
                                        VerticalOptions="CenterAndExpand"
                                        Margin="15,0,0,0"
-                                       IsEnabled="{Binding EnableParityCheck}"/>
+                                       IsEnabled="{Binding EnableParityCheck}"
+                                       TextColor="{Binding EnableParityCheck, Converter={StaticResource colorConverter}}"/>
                                 <Picker Title="Parity Type"
                                         HorizontalOptions="EndAndExpand"
                                         Margin="0,5,15,5"
                                         WidthRequest="150"
                                         ItemsSource="{Binding ParityTypes}"
                                         SelectedItem="{Binding SelectedParityType}"
-                                        IsEnabled="{Binding EnableParityCheck}"/>
+                                        IsEnabled="{Binding EnableParityCheck}"
+                                        TextColor="{Binding EnableParityCheck, Converter={StaticResource colorConverter}}"
+                                        TitleColor="{Binding EnableParityCheck, Converter={StaticResource colorConverter}}"/>
                             </StackLayout>
                         </ViewCell>
                         <SwitchCell Text="Error Reception"
