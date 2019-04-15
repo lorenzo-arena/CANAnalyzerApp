@@ -32,4 +32,34 @@ namespace CANAnalyzerApp
             // Handle when your app resumes
         }
     }
+
+    public class NegateBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+    }
+
+    public class ColorFromBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((bool)value)
+                return Color.FromHex("#000000");
+            else
+                return Color.FromHex("#8F8F8F");
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((Color)value == Color.FromHex("#000000"))
+                return true;
+            else
+                return false;
+        }
+    }
 }

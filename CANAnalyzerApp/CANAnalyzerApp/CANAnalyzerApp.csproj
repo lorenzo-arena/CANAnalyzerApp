@@ -10,12 +10,40 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="3.4.0.1008975" />  
+    <PackageReference Include="Plugin.BLE" Version="1.3.0" />
+    <PackageReference Include="Xamarin.Forms" Version="3.6.0.293080" />  
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\BLETestPage.xaml.cs">
+      <DependentUpon>BLETestPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\CANSpyPage.xaml.cs">
       <DependentUpon>CANSpyPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\SpyControlsPage.xaml.cs">
+      <DependentUpon>SpyControlsPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Views\CANSettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\BLETestPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\DeviceSettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\KSettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\KSpyPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\SpyControlsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

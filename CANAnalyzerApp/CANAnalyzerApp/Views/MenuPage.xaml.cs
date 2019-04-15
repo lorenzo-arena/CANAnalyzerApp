@@ -20,7 +20,11 @@ namespace CANAnalyzerApp.Views
             {
                 new HomeMenuItem {Id = MenuItemType.CANSpyOne, Title="CAN Line 1", Foreground = Color.FromHex("#282828") },
                 new HomeMenuItem {Id = MenuItemType.CANSpyTwo, Title="CAN Line 2", Foreground = Color.FromHex("#F0F0F0") },
-                new HomeMenuItem {Id = MenuItemType.KLineSpy, Title="K Line", Foreground = Color.FromHex("#F0F0F0") }
+                new HomeMenuItem {Id = MenuItemType.KLineSpy, Title="K Line", Foreground = Color.FromHex("#F0F0F0") },
+                new HomeMenuItem {Id = MenuItemType.DeviceSettings, Title="Device Settings", Foreground = Color.FromHex("#F0F0F0") },
+#if DEBUG
+                new HomeMenuItem {Id = MenuItemType.BLETest, Title="BLE Test", Foreground = Color.FromHex("#F0F0F0") }
+#endif
             };
 
             ListViewMenu.ItemsSource = menuItems;

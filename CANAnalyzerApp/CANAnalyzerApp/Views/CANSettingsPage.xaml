@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:CANAnalyzerApp.Views"
+             xmlns:app="clr-namespace:CANAnalyzerApp"
+             x:Class="CANAnalyzerApp.Views.CANSettingsPage"
+             Title="Settings">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!--Page Level Resources: Compatible with Xamarin Live Player -->
+            <Color x:Key="BackgroundColor">#282828</Color>
+            <Color x:Key="LightBackgroundColor">#858585</Color>
+            <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
+            <Color x:Key="ForegroundDarkColor">#101010</Color>
+            <Color x:Key="LogoColor">#DE0000</Color>
+            <app:ColorFromBooleanConverter x:Key="colorConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
+    <ContentPage.Content>
+        <StackLayout>
+            <TableView Intent="Settings">
+                <TableRoot>
+                    <TableSection Title="CAN Line Settings">
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Bit Timing"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Picker Title="Bit Timing"
+                                        HorizontalOptions="EndAndExpand"
+                                        Margin="0,5,15,5"
+                                        WidthRequest="150"
+                                        ItemsSource="{Binding BitTimings}"
+                                        SelectedItem="{Binding SelectedBitTiming}"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Sampling Point"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Picker Title="Sampling Point"
+                                        HorizontalOptions="EndAndExpand"
+                                        Margin="0,5,15,5"
+                                        WidthRequest="150"
+                                        ItemsSource="{Binding SamplingPoints}"
+                                        SelectedItem="{Binding SelectedSamplingPoint}"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Frame Format"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Picker Title="Frame Format"
+                                        HorizontalOptions="EndAndExpand"
+                                        Margin="0,5,15,5"
+                                        WidthRequest="150"
+                                        ItemsSource="{Binding FrameFormats}"
+                                        SelectedItem="{Binding SelectedFrameFormat}"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <SwitchCell Text="Error Reception"
+                                    On="{Binding EnableErrorReception}"/>
+                        <SwitchCell Text="Apply Mask and ID"
+                                    On="{Binding ApplyMask}"/>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Mask"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"
+                                       IsEnabled="{Binding ApplyMask}"
+                                       TextColor="{Binding ApplyMask, Converter={StaticResource colorConverter}}"/>
+                                <Entry Placeholder="Mask (Hex)"
+                                       HorizontalOptions="EndAndExpand"
+                                       Margin="0,5,15,5"
+                                       WidthRequest="250"
+                                       Text="{Binding Mask}"
+                                       IsEnabled="{Binding ApplyMask}">
+                                    <Entry.Behaviors>
+                                        <local:HexValidationBehavior></local:HexValidationBehavior>
+                                    </Entry.Behaviors>
+                                </Entry>
+                            </StackLayout>
+                        </ViewCell>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="ID"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"
+                                       IsEnabled="{Binding ApplyMask}"
+                                       TextColor="{Binding ApplyMask, Converter={StaticResource colorConverter}}"/>
+                                <Entry Placeholder="ID (Hex)"
+                                       HorizontalOptions="EndAndExpand"
+                                       Margin="0,5,15,5"
+                                       WidthRequest="250"
+                                       Text="{Binding ID}"
+                                       IsEnabled="{Binding ApplyMask}">
+                                    <Entry.Behaviors>
+                                        <local:HexValidationBehavior></local:HexValidationBehavior>
+                                    </Entry.Behaviors>
+                                </Entry>
+                            </StackLayout>
+                        </ViewCell>
+                    </TableSection>
+                </TableRoot>
+            </TableView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
