@@ -24,6 +24,20 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref isConnecting, value); }
         }
 
+        string serialNumber = "";
+        public string SerialNumber
+        {
+            get { return serialNumber; }
+            set { SetProperty(ref serialNumber, value); }
+        }
+
+        string firmwareVersion = "";
+        public string FirmwareVersion
+        {
+            get { return firmwareVersion; }
+            set { SetProperty(ref firmwareVersion, value); }
+        }
+
         public DeviceSettingsViewModel()
         {
             Title = "Device Settings";

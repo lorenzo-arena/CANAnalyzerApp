@@ -20,6 +20,36 @@ namespace CANAnalyzerApp.Views
 			InitializeComponent ();
 
             BindingContext = viewModel = new DeviceSettingsViewModel();
+
+            MessagingCenter.Subscribe<BLETestViewModel>(this, "DeviceConnectedOk", async (obj) =>
+            {
+                await DisplayAlert("CANAnalyzer", "Dispositivo connesso.", "Ok");
+            });
+
+            MessagingCenter.Subscribe<BLETestViewModel>(this, "DeviceConnectedFailed", async (obj) =>
+            {
+                await DisplayAlert("CANAnalyzer", "Connessioni fallita.", "Ok");
+            });
         }
 	}
+
+    public class SettingsFromStringConverter : IValueConverter
+    {
+        private const char dash = '\u2014';
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((string)value == "")
+                return dash.ToString();
+            else
+                return (string)value;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((string)value == dash.ToString())
+                return "";
+            else
+                return (string)value;
+        }
+    }
 }

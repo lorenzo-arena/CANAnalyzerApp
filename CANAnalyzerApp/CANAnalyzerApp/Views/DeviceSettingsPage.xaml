@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:app="clr-namespace:CANAnalyzerApp"
-             x:Class="CANAnalyzerApp.Views.DeviceSettingsPage">
+             xmlns:local="clr-namespace:CANAnalyzerApp.Views"
+             x:Class="CANAnalyzerApp.Views.DeviceSettingsPage"
+             BackgroundColor="#EFEFF4">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -13,6 +15,7 @@
             <Color x:Key="ForegroundDarkColor">#101010</Color>
             <Color x:Key="LogoColor">#DE0000</Color>
             <app:NegateBooleanConverter x:Key="inverter"/>
+            <local:SettingsFromStringConverter x:Key="settingsConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -25,6 +28,36 @@
             <ActivityIndicator IsVisible="{Binding IsConnecting}"
                                IsRunning="{Binding IsConnecting}"
                                Color="{StaticResource LogoColor}"/>
+            <TableView Intent="Settings">
+                <TableRoot>
+                    <TableSection Title="Device Info">
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Serial Number:"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Label Text="{Binding SerialNumber, Converter={StaticResource settingsConverter}}"
+                                       HorizontalOptions="EndAndExpand"
+                                       TextColor="#503026"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="0,0,15,0"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Firmware Version:"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Label Text="{Binding FirmwareVersion, Converter={StaticResource settingsConverter}}"
+                                       HorizontalOptions="EndAndExpand"
+                                       TextColor="#503026"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="0,0,15,0"/>
+                            </StackLayout>
+                        </ViewCell>
+                    </TableSection>
+                </TableRoot>
+            </TableView>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
