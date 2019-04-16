@@ -26,6 +26,9 @@ namespace CANAnalyzerApp.Services
         bool IsConnecting();
         bool IsConnected();
 
+        string GetSerialNumber();
+        string GetFirmwareVersion();
+
         Task<bool> ConnectToDeviceAsync();
         Task<bool> TestCommandAsync();
         Task<bool> SetCANParametersAsync(CANParam param);

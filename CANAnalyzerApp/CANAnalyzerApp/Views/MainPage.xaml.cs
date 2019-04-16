@@ -17,7 +17,7 @@ namespace CANAnalyzerApp.Views
 
             MasterBehavior = MasterBehavior.Popover;
 
-            MenuPages.Add((int)MenuItemType.CANSpyOne, (NavigationPage)Detail);
+            MenuPages.Add((int)MenuItemType.DeviceSettings, (NavigationPage)Detail);
         }
 
         public async Task NavigateFromMenu(int id)

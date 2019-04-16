@@ -45,6 +45,16 @@ namespace CANAnalyzerApp.Services
             return isConnecting;
         }
 
+        public string GetSerialNumber()
+        {
+            return serialNumber;
+        }
+
+        public string GetFirmwareVersion()
+        {
+            return fwVersion;
+        }
+
         public async Task<bool> ConnectToDeviceAsync()
         {
             var ble = CrossBluetoothLE.Current;
@@ -115,7 +125,7 @@ namespace CANAnalyzerApp.Services
 
             if (res != null && res.Length > 0)
             {
-                UInt32 errorCode = BitConverter.ToUInt32(res, 4);
+                UInt32 errorCode = ArrConverter.GetUInt32FromBuffer(res, 4);
                 string marker = Encoding.ASCII.GetString(res, 0, 4);
 
                 if (marker != frameMarker)
@@ -124,12 +134,11 @@ namespace CANAnalyzerApp.Services
                 if (errorCode != 0)
                     throw new Exception("Errore: " + errorCode);
 
-                string majorVer = BitConverter.ToUInt16(res, 8).ToString();
-                string minorVer = BitConverter.ToUInt16(res, 10).ToString("D3");
-                fwVersion = String.Format("{0}.{1}", majorVer, minorVer);
+                UInt32 serialNum = ArrConverter.GetUInt32FromBuffer(res, 8);
+                serialNumber = serialNum.ToString("D8");
             }
-            //else
-            //    throw new Exception("Dimensione della risposta errata!");
+            else
+                throw new Exception("Dimensione della risposta errata!");
 
             const UInt32 getFWVerCommand = 0x00000002;
             await SendReceiveInitCommand(4);
@@ -138,7 +147,7 @@ namespace CANAnalyzerApp.Services
 
             if (res != null && res.Length > 0)
             {
-                UInt32 errorCode = BitConverter.ToUInt32(res, 4);
+                UInt32 errorCode = ArrConverter.GetUInt32FromBuffer(res, 4);
                 string marker = Encoding.ASCII.GetString(res, 0, 4);
 
                 if (marker != frameMarker)
@@ -147,11 +156,12 @@ namespace CANAnalyzerApp.Services
                 if (errorCode != 0)
                     throw new Exception("Errore: " + errorCode);
 
-                UInt32 serialNum = BitConverter.ToUInt32(res, 8);
-                serialNumber = serialNum.ToString("D8");
+                string majorVer = ArrConverter.GetUInt16FromBuffer(res, 8).ToString();
+                string minorVer = ArrConverter.GetUInt16FromBuffer(res, 10).ToString("D3");
+                fwVersion = String.Format("{0}.{1}", majorVer, minorVer);
             }
-            //else
-            //    throw new Exception("Dimensione della risposta errata!");
+            else
+                throw new Exception("Dimensione della risposta errata!");
 
             return await Task.FromResult(true);
         }
@@ -185,10 +195,7 @@ namespace CANAnalyzerApp.Services
                         byte[] frame = new byte[4];
 
                         // Copio la lunghezza del messaggio da inviare successivamente
-                        frame[0] = (byte)((nextLength & 0xFF000000) >> 24);
-                        frame[1] = (byte)((nextLength & 0x00FF0000) >> 16);
-                        frame[2] = (byte)((nextLength & 0x0000FF00) >> 8);
-                        frame[3] = (byte)(nextLength & 0x000000FF);
+                        ArrConverter.SetBufferFromUInt32(nextLength, frame, 0);
 
                         await SendFrame(frame);
 
@@ -232,11 +239,8 @@ namespace CANAnalyzerApp.Services
                 {
                     byte[] frame = new byte[4];
 
-                    // Copio la lunghezza del messaggio da inviare successivamente
-                    frame[0] = (byte)((command & 0xFF000000) >> 24);
-                    frame[1] = (byte)((command & 0x00FF0000) >> 16);
-                    frame[2] = (byte)((command & 0x0000FF00) >> 8);
-                    frame[3] = (byte)(command & 0x000000FF);
+                    // Copio il codice del comando
+                    ArrConverter.SetBufferFromUInt32(command, frame, 0);
 
                     await SendFrame(frame);
                 }
@@ -261,12 +265,12 @@ namespace CANAnalyzerApp.Services
                     // Imposto l'header
                     Encoding.ASCII.GetBytes(frameMarker).CopyTo(frameToSend, 0);
 
+                    // Imposto il frame da inviare
                     frame.CopyTo(frameToSend, 4);
 
+                    // Calcolo e imposto il crc
                     UInt32 crc = Crc32_STM.CalculateBuffer(frameToSend, frameToSend.Length - 4);
-
-                    // Copio la lunghezza del messaggio da inviare successivamente
-                    BitConverter.GetBytes(crc).CopyTo(frameToSend, frameToSend.Length - 4);
+                    ArrConverter.SetBufferFromUInt32(crc, frameToSend, frameToSend.Length - 4);
 
                     await analyzerChar.WriteAsync(frameToSend);
                 }
