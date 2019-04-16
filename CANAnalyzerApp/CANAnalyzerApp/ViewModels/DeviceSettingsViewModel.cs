@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -38,9 +39,18 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref firmwareVersion, value); }
         }
 
+        string appVersion = "";
+        public string AppVersion
+        {
+            get { return appVersion; }
+            set { SetProperty(ref appVersion, value); }
+        }
+
         public DeviceSettingsViewModel()
         {
             Title = "Device Settings";
+
+            AppVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
 
             ConnectCommand = new Command(async () => {
                 IsConnecting = true;
@@ -53,6 +63,12 @@ namespace CANAnalyzerApp.ViewModels
 
                 IsConnecting = false;
                 IsConnected = AnalyzerDevice.IsConnected();
+
+                if(IsConnected)
+                {
+                    SerialNumber = AnalyzerDevice.GetSerialNumber();
+                    FirmwareVersion = AnalyzerDevice.GetFirmwareVersion();
+                }
             });
         }
     }
