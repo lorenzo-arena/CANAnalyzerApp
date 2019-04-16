@@ -30,6 +30,7 @@ namespace CANAnalyzerApp.Services
         string GetFirmwareVersion();
 
         Task<bool> ConnectToDeviceAsync();
+        Task<bool> DisconnectFromDeviceAsync();
         Task<bool> TestCommandAsync();
         Task<bool> SetCANParametersAsync(CANParam param);
         Task<bool> SetKParametersAsync(KParam param);

@@ -68,6 +68,9 @@ namespace CANAnalyzerApp.Services
 
             IDevice device = deviceList.Find(x => x.Name == DeviceName);
 
+            if(device == null)
+                return await Task.FromResult(false);
+
             try
             {
                 await adapter.ConnectToDeviceAsync(device);
@@ -82,13 +85,41 @@ namespace CANAnalyzerApp.Services
                 // ... could not connect to device
                 isConnected = false;
                 isConnecting = false;
-                return await Task.FromResult(false);
+                throw e;
             }
 
             isConnecting = false;
 
             //ICharacteristic analyzerChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
             //analyzerChar.ValueUpdated += CharUpdated;
+
+            return await Task.FromResult(true);
+        }
+
+        public async Task<bool> DisconnectToDeviceAsync()
+        {
+            isConnecting = true;
+
+            var connectedDevices = new List<IDevice>(CrossBluetoothLE.Current.Adapter.ConnectedDevices);
+
+            var device = connectedDevices.Find(x => x.Name == DeviceName);
+
+            if (device == null)
+                return await Task.FromResult(false);
+
+            try
+            {
+                await CrossBluetoothLE.Current.Adapter.DisconnectDeviceAsync(device);
+                isConnected = false;
+            }
+            catch (Exception e)
+            {
+                isConnected = false;
+                isConnecting = false;
+                throw e;
+            }
+
+            isConnecting = false;
 
             return await Task.FromResult(true);
         }
@@ -129,10 +160,16 @@ namespace CANAnalyzerApp.Services
                 string marker = Encoding.ASCII.GetString(res, 0, 4);
 
                 if (marker != frameMarker)
-                    throw new Exception("Errore: marker non valido");
+                    throw new Exception("invalid marker");
 
                 if (errorCode != 0)
-                    throw new Exception("Errore: " + errorCode);
+                    throw new Exception(errorCode.ToString());
+
+                UInt32 crcSent = ArrConverter.GetUInt32FromBuffer(res, res.Length - 4);
+                UInt32 crcCalc = Crc32_STM.CalculateFromBuffer(res, res.Length - 4);
+
+                if(crcSent != crcCalc)
+                    throw new Exception("invalid crc");
 
                 UInt32 serialNum = ArrConverter.GetUInt32FromBuffer(res, 8);
                 serialNumber = serialNum.ToString("D8");
@@ -151,10 +188,16 @@ namespace CANAnalyzerApp.Services
                 string marker = Encoding.ASCII.GetString(res, 0, 4);
 
                 if (marker != frameMarker)
-                    throw new Exception("Errore: marker non valido");
+                    throw new Exception("invalid marker");
 
                 if (errorCode != 0)
-                    throw new Exception("Errore: " + errorCode);
+                    throw new Exception(errorCode.ToString());
+
+                UInt32 crcSent = ArrConverter.GetUInt32FromBuffer(res, res.Length - 4);
+                UInt32 crcCalc = Crc32_STM.CalculateFromBuffer(res, res.Length - 4);
+
+                if (crcSent != crcCalc)
+                    throw new Exception("invalid crc");
 
                 string majorVer = ArrConverter.GetUInt16FromBuffer(res, 8).ToString();
                 string minorVer = ArrConverter.GetUInt16FromBuffer(res, 10).ToString("D3");
@@ -269,7 +312,7 @@ namespace CANAnalyzerApp.Services
                     frame.CopyTo(frameToSend, 4);
 
                     // Calcolo e imposto il crc
-                    UInt32 crc = Crc32_STM.CalculateBuffer(frameToSend, frameToSend.Length - 4);
+                    UInt32 crc = Crc32_STM.CalculateFromBuffer(frameToSend, frameToSend.Length - 4);
                     ArrConverter.SetBufferFromUInt32(crc, frameToSend, frameToSend.Length - 4);
 
                     await analyzerChar.WriteAsync(frameToSend);

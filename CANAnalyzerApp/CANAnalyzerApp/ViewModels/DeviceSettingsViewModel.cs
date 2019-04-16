@@ -56,10 +56,17 @@ namespace CANAnalyzerApp.ViewModels
                 IsConnecting = true;
                 IsConnected = false;
 
-                if (await AnalyzerDevice.ConnectToDeviceAsync())
-                    MessagingCenter.Send(this, "DeviceConnectedOk");
-                else
-                    MessagingCenter.Send(this, "DeviceConnectedFailed");
+                try
+                {
+                    if (await AnalyzerDevice.ConnectToDeviceAsync())
+                        MessagingCenter.Send<DeviceSettingsViewModel>(this, "DeviceConnectedOk");
+                    else
+                        MessagingCenter.Send<DeviceSettingsViewModel>(this, "DeviceConnectedFailed");
+                }
+                catch(Exception ex)
+                {
+                    MessagingCenter.Send<DeviceSettingsViewModel, string>(this, "DeviceConnectedError", ex.Message);
+                } 
 
                 IsConnecting = false;
                 IsConnected = AnalyzerDevice.IsConnected();
