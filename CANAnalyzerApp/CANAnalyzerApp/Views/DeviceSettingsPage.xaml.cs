@@ -21,17 +21,27 @@ namespace CANAnalyzerApp.Views
 
             BindingContext = viewModel = new DeviceSettingsViewModel();
 
-            MessagingCenter.Subscribe<BLETestViewModel>(this, "DeviceConnectedOk", async (obj) =>
+            MessagingCenter.Subscribe<DeviceSettingsViewModel>(this, "DeviceConnectedFailed", async (sender) =>
             {
-                await DisplayAlert("CANAnalyzer", "Dispositivo connesso.", "Ok");
+                await OnDeviceConnectionFailed();
             });
 
-            MessagingCenter.Subscribe<BLETestViewModel>(this, "DeviceConnectedFailed", async (obj) =>
+            MessagingCenter.Subscribe<DeviceSettingsViewModel, string>(this, "DeviceConnectedError", async (sender, message) =>
             {
-                await DisplayAlert("CANAnalyzer", "Connessioni fallita.", "Ok");
+                await OnDeviceConnectionError(message);
             });
         }
-	}
+
+        private async Task OnDeviceConnectionFailed()
+        {
+            await DisplayAlert("CANAnalyzer", "Connection failed.", "Ok");
+        }
+
+        private async Task OnDeviceConnectionError(string message)
+        {
+            await DisplayAlert("CANAnalyzer", "Error: " + message, "Ok");
+        }
+    }
 
     public class SettingsFromStringConverter : IValueConverter
     {
@@ -50,6 +60,42 @@ namespace CANAnalyzerApp.Views
                 return "";
             else
                 return (string)value;
+        }
+    }
+
+    public class StatusStringFromBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((bool)value)
+                return "Connected";
+            else
+                return "Disconnected";
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((string)value == "Connected")
+                return true;
+            else
+                return false;
+        }
+    }
+
+    public class StatusColorFromBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((bool)value)
+                return Color.FromHex("#00DE00");
+            else
+                return Color.FromHex("#DE0000");
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((Color)value == Color.FromHex("#00DE00"))
+                return true;
+            else
+                return false;
         }
     }
 }

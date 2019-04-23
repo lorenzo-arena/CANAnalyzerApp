@@ -12,7 +12,7 @@ namespace CANAnalyzerApp.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
-        public IAnalyzerDevice AnalyzerDevice = new BLEDevice();
+        public IAnalyzerDevice AnalyzerDevice = BLEDevice.Instance;
 
         bool isBusy = false;
         public bool IsBusy

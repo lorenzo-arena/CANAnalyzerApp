@@ -1,38 +1,66 @@
 ﻿using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
+using Plugin.BLE.Abstractions.EventArgs;
 using Plugin.BLE.Abstractions.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CANAnalyzerApp.Services
 {
-    class BLEDevice : IAnalyzerDevice
+    public class BLEDevice : IAnalyzerDevice
     {
-        private const string DeviceName = "CANAnalyzer";
-        private const string AnalyzerCharacteristic = "ffe1";
-        private List<ICharacteristic> characteristics = new List<ICharacteristic>();
+        public static BLEDevice Instance { get; } = new BLEDevice();
 
-        private const string frameMarker = "DSCA";
-        private const int initFrameLength = 12;
-
-        private bool isConnected = false;
-        private bool isConnecting = false;
-
-        public BLEDevice()
+        static BLEDevice()
         {
 
         }
 
+        private BLEDevice()
+        {
+
+        }        
+
+        private const string _deviceName = "CANAnalyzer";
+        private const string _analyzerCharacteristic = "ffe1";
+        ICharacteristic _analyzerChar = null;
+        byte[] _responseFrame = null;
+
+        private const string _frameMarker = "DSCA";
+        private const int _initFrameLength = 12;
+
+        private bool _isConnected = false;
+        private bool _isConnecting = false;
+
+        private string _fwVersion = "";
+        private string _serialNumber = "";
+
         public bool IsConnected()
         {
-            return isConnected;
+            return _isConnected;
         }
 
         public bool IsConnecting()
         {
-            return isConnecting;
+            return _isConnecting;
+        }
+
+        public string GetSerialNumber()
+        {
+            return _serialNumber;
+        }
+
+        public string GetFirmwareVersion()
+        {
+            return _fwVersion;
+        }
+
+        protected virtual void OnCharacteristicValueUpdated(object o, CharacteristicUpdatedEventArgs args)
+        {
+            _responseFrame = args.Characteristic.Value;
         }
 
         public async Task<bool> ConnectToDeviceAsync()
@@ -41,32 +69,69 @@ namespace CANAnalyzerApp.Services
             var adapter = CrossBluetoothLE.Current.Adapter;
             List<IDevice> deviceList = new List<IDevice>();
 
-            isConnecting = true;
+            _isConnecting = true;
 
             adapter.DeviceDiscovered += (s, a) => deviceList.Add(a.Device);
             await adapter.StartScanningForDevicesAsync();
 
-            IDevice device = deviceList.Find(x => x.Name == DeviceName);
+            IDevice device = deviceList.Find(x => x.Name == _deviceName);
+
+            if(device == null)
+                return await Task.FromResult(false);
 
             try
             {
                 await adapter.ConnectToDeviceAsync(device);
                 List<IService> services = (List<IService>)await device.GetServicesAsync();
-                characteristics = (List<ICharacteristic>)await services[1].GetCharacteristicsAsync();
-                isConnected = true;
+                List<ICharacteristic> characteristics = (List<ICharacteristic>)await services[1].GetCharacteristicsAsync();
+                _isConnected = true;
+
+                _analyzerChar = characteristics.Find(x => x.Uuid == _analyzerCharacteristic);
+
+                _analyzerChar.ValueUpdated += OnCharacteristicValueUpdated;
+
+                await GetDeviceInfo();
             }
             catch (Exception e)
             {
                 // ... could not connect to device
-                isConnected = false;
-                isConnecting = false;
-                return await Task.FromResult(false);
+                _isConnected = false;
+                _isConnecting = false;
+                throw e;
             }
 
-            isConnecting = false;
+            _isConnecting = false;
 
             //ICharacteristic analyzerChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
             //analyzerChar.ValueUpdated += CharUpdated;
+
+            return await Task.FromResult(true);
+        }
+
+        public async Task<bool> DisconnectFromDeviceAsync()
+        {
+            _isConnecting = true;
+
+            var connectedDevices = new List<IDevice>(CrossBluetoothLE.Current.Adapter.ConnectedDevices);
+
+            var device = connectedDevices.Find(x => x.Name == _deviceName);
+
+            if (device == null)
+                return await Task.FromResult(false);
+
+            try
+            {
+                await CrossBluetoothLE.Current.Adapter.DisconnectDeviceAsync(device);
+                _isConnected = false;
+            }
+            catch (Exception e)
+            {
+                _isConnected = false;
+                _isConnecting = false;
+                throw e;
+            }
+
+            _isConnecting = false;
 
             return await Task.FromResult(true);
         }
@@ -91,11 +156,36 @@ namespace CANAnalyzerApp.Services
             return await Task.FromResult(true);
         }
 
+        public async Task<bool> GetDeviceInfo()
+        {
+            byte[] res = null;
+
+            const UInt32 getSNCommand = 0x00000001;
+
+            await SendReceiveInitCommand(4);
+            await SendCommand(getSNCommand, 4);
+            res = await ReceiveFrame();
+
+            UInt32 serialNum = ArrConverter.GetUInt32FromBuffer(res, 8);
+            _serialNumber = serialNum.ToString("D8");
+
+            const UInt32 getFWVerCommand = 0x00000002;
+            await SendReceiveInitCommand(4);
+            await SendCommand(getFWVerCommand, 4);
+            res = await ReceiveFrame();
+
+            string majorVer = ArrConverter.GetUInt16FromBuffer(res, 8).ToString();
+            string minorVer = ArrConverter.GetUInt16FromBuffer(res, 10).ToString("D3");
+            _fwVersion = String.Format("{0}.{1}", majorVer, minorVer);
+
+            return await Task.FromResult(true);
+        }
+
         public async Task<bool> TestCommandAsync()
         {
             const UInt32 testCommand = 0x3F3F3F3F;
 
-            await SendInitCommand(4);
+            await SendReceiveInitCommand(4);
 
             await SendCommand(testCommand, 4);
 
@@ -105,61 +195,24 @@ namespace CANAnalyzerApp.Services
         // Invia il frame di start della comunicazione
         // indicando la lunghezza del frame successivo
         // compresi la dimensione dell'header e del CRC finale
-        public async Task<bool> SendInitCommand(UInt32 nextLength)
+        public async Task<bool> SendReceiveInitCommand(UInt32 nextLength)
         {
-            if (!isConnected)
+            if (!_isConnected)
                 return await Task.FromResult(false);
             else
             {
                 try
                 {
-                    ICharacteristic analyzerChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
-
-                    if (analyzerChar != null)
+                    if (_analyzerChar != null)
                     {
-                        byte[] frame = new byte[initFrameLength];
-
-                        // Imposto l'header
-                        Encoding.ASCII.GetBytes(frameMarker).CopyTo(frame, 0);
+                        byte[] frame = new byte[4];
 
                         // Copio la lunghezza del messaggio da inviare successivamente
-                        frame[4] = (byte)((nextLength & 0xFF000000) >> 24);
-                        frame[5] = (byte)((nextLength & 0x00FF0000) >> 16);
-                        frame[6] = (byte)((nextLength & 0x0000FF00) >> 8);
-                        frame[7] = (byte)(nextLength & 0x000000FF);
+                        ArrConverter.SetBufferFromUInt32(nextLength, frame, 0);
 
-                        UInt32 crc = Crc32_STM.CalculateBuffer(frame, initFrameLength - 4);
+                        await SendFrame(frame);
 
-                        // Copio la lunghezza del messaggio da inviare successivamente
-                        frame[8] = (byte)((crc & 0xFF000000) >> 24);
-                        frame[9] = (byte)((crc & 0x00FF0000) >> 16);
-                        frame[10] = (byte)((crc & 0x0000FF00) >> 8);
-                        frame[11] = (byte)(crc & 0x000000FF);
-
-                        await analyzerChar.WriteAsync(frame);
-
-                        byte[] responseFrame = null;
-
-                        analyzerChar.ValueUpdated += (o, args) =>
-                        {
-                            responseFrame = args.Characteristic.Value;
-                        };
-
-                        await analyzerChar.StartUpdatesAsync();
-
-                        if (responseFrame != null && responseFrame.Length == 8)
-                        {
-                            UInt32 errorCode = BitConverter.ToUInt32(responseFrame, 4);
-                            string marker = Encoding.ASCII.GetString(responseFrame, 0, 4);
-
-                            if (marker != frameMarker)
-                                throw new Exception("Errore: marker non valido");
-
-                            if (errorCode != 0)
-                                throw new Exception("Errore: " + errorCode);
-                        }
-                        else
-                            throw new Exception("Dimensione della risposta errata!");
+                        byte[] responseFrame = await ReceiveFrame();
 
                         return await Task.FromResult(true);
                     }
@@ -171,46 +224,90 @@ namespace CANAnalyzerApp.Services
                     return await Task.FromResult(false);
                 }
             }
-
-            return await Task.FromResult(true);
         }
 
         public async Task<bool> SendCommand(UInt32 command, UInt32 length)
         {
-            if (!isConnected)
+            if (!_isConnected)
                 return await Task.FromResult(false);
             else
             {
-                ICharacteristic analyzerChar = characteristics.Find(x => x.Uuid == AnalyzerCharacteristic);
-
-                if (analyzerChar != null)
+                if (_analyzerChar != null)
                 {
-                    byte[] frame = new byte[8 + length];
+                    byte[] frame = new byte[4];
 
-                    // Imposto l'header
-                    Encoding.ASCII.GetBytes(frameMarker).CopyTo(frame, 0);
+                    // Copio il codice del comando
+                    ArrConverter.SetBufferFromUInt32(command, frame, 0);
 
-                    // Copio la lunghezza del messaggio da inviare successivamente
-                    frame[4] = (byte)((command & 0xFF000000) >> 24);
-                    frame[5] = (byte)((command & 0x00FF0000) >> 16);
-                    frame[6] = (byte)((command & 0x0000FF00) >> 8);
-                    frame[7] = (byte)(command & 0x000000FF);
-
-                    UInt32 crc = Crc32_STM.CalculateBuffer(frame, initFrameLength - 4);
-
-                    // Copio la lunghezza del messaggio da inviare successivamente
-                    frame[8] = (byte)((crc & 0xFF000000) >> 24);
-                    frame[9] = (byte)((crc & 0x00FF0000) >> 16);
-                    frame[10] = (byte)((crc & 0x0000FF00) >> 8);
-                    frame[11] = (byte)(crc & 0x000000FF);
-
-                    await analyzerChar.WriteAsync(frame);
+                    await SendFrame(frame);
                 }
                 else
                     return await Task.FromResult(false);
             }
-
             return await Task.FromResult(true);
+        }
+
+        public async Task<bool> SendFrame(byte[] frame)
+        {
+            if (!_isConnected)
+                return await Task.FromResult(false);
+            else
+            {
+                if (_analyzerChar != null)
+                {
+                    _responseFrame = null;
+                    byte[] frameToSend = new byte[8 + frame.Length];
+
+                    // Imposto l'header
+                    Encoding.ASCII.GetBytes(_frameMarker).CopyTo(frameToSend, 0);
+
+                    // Imposto il frame da inviare
+                    frame.CopyTo(frameToSend, 4);
+
+                    // Calcolo e imposto il crc
+                    UInt32 crc = Crc32_STM.CalculateFromBuffer(frameToSend, frameToSend.Length - 4);
+                    ArrConverter.SetBufferFromUInt32(crc, frameToSend, frameToSend.Length - 4);
+
+                    await _analyzerChar.WriteAsync(frameToSend);
+                }
+                else
+                    return await Task.FromResult(false);
+            }
+            return await Task.FromResult(true);
+        }
+
+        public async Task<byte[]> ReceiveFrame()
+        {
+            if (!_isConnected)
+                return await Task.FromResult(new byte[0]);
+            else
+            {
+                await _analyzerChar.StartUpdatesAsync();
+                await Task.Delay(50);
+                await _analyzerChar.StopUpdatesAsync();
+
+                if (_responseFrame == null || _responseFrame.Length == 0)
+                    throw new Exception("dimensione della risposta errata!");
+
+                // Controllo il marker
+                string marker = Encoding.ASCII.GetString(_responseFrame, 0, 4);
+                if (marker != _frameMarker)
+                    throw new Exception("invalid marker");
+
+                // Controllo il crc
+                UInt32 crcSent = ArrConverter.GetUInt32FromBuffer(_responseFrame, _responseFrame.Length - 4);
+                UInt32 crcCalc = Crc32_STM.CalculateFromBuffer(_responseFrame, _responseFrame.Length - 4);
+
+                if (crcSent != crcCalc)
+                    throw new Exception("invalid crc");
+
+                // Controllo se ho una risposta con codice di errore
+                UInt32 errorCode = ArrConverter.GetUInt32FromBuffer(_responseFrame, 4);
+                if (errorCode != 0)
+                    throw new Exception(errorCode.ToString());
+            }
+
+            return await Task.FromResult(_responseFrame);
         }
     }
 }

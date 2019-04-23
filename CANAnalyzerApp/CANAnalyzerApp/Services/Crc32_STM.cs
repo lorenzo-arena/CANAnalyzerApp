@@ -27,7 +27,7 @@ namespace CANAnalyzerApp.Services
             return crc;
         }
 
-        public static UInt32 CalculateBuffer(UInt32 initialValue, UInt32[] buff)
+        public static UInt32 CalculateFromBuffer(UInt32 initialValue, UInt32[] buff)
         {
             UInt32 crcValue = initialValue;
             for (int index = 0; index < buff.Length; index++)
@@ -38,7 +38,7 @@ namespace CANAnalyzerApp.Services
             return crcValue;
         }
 
-        public static UInt32 CalculateBuffer(byte[] buffBytes, int length)
+        public static UInt32 CalculateFromBuffer(byte[] buffBytes, int length)
         {
             UInt32[] buff = new UInt32[length / 4];
             Buffer.BlockCopy(buffBytes, 0, buff, 0, length);
