@@ -148,11 +148,43 @@ namespace CANAnalyzerApp.Services
 
         public async Task<bool> StartSpyAsync(SpyType type)
         {
+            const UInt32 startCAN1Spy = 0x00010001;
+            const UInt32 startCAN2Spy = 0x00010003;
+
+            if (type == SpyType.CANSpyOne)
+            {
+                await SendReceiveInitCommand(4);
+                await SendCommand(startCAN1Spy);
+                await ReceiveFrame();
+            }
+            else if (type == SpyType.CANSpyTwo)
+            {
+                await SendReceiveInitCommand(4);
+                await SendCommand(startCAN2Spy);
+                await ReceiveFrame();
+            }
+
             return await Task.FromResult(true);
         }
 
         public async Task<bool> StopSpyAsync(SpyType type)
         {
+            const UInt32 stopCAN1Spy = 0x00010002;
+            const UInt32 stopCAN2Spy = 0x00010004;
+
+            if (type == SpyType.CANSpyOne)
+            {
+                await SendReceiveInitCommand(4);
+                await SendCommand(stopCAN1Spy);
+                await ReceiveFrame();
+            }
+            else if (type == SpyType.CANSpyTwo)
+            {
+                await SendReceiveInitCommand(4);
+                await SendCommand(stopCAN2Spy);
+                await ReceiveFrame();
+            }
+
             return await Task.FromResult(true);
         }
 
@@ -163,7 +195,7 @@ namespace CANAnalyzerApp.Services
             const UInt32 getSNCommand = 0x00000001;
 
             await SendReceiveInitCommand(4);
-            await SendCommand(getSNCommand, 4);
+            await SendCommand(getSNCommand);
             res = await ReceiveFrame();
 
             UInt32 serialNum = ArrConverter.GetUInt32FromBuffer(res, 8);
@@ -171,7 +203,7 @@ namespace CANAnalyzerApp.Services
 
             const UInt32 getFWVerCommand = 0x00000002;
             await SendReceiveInitCommand(4);
-            await SendCommand(getFWVerCommand, 4);
+            await SendCommand(getFWVerCommand);
             res = await ReceiveFrame();
 
             string majorVer = ArrConverter.GetUInt16FromBuffer(res, 8).ToString();
@@ -187,7 +219,7 @@ namespace CANAnalyzerApp.Services
 
             await SendReceiveInitCommand(4);
 
-            await SendCommand(testCommand, 4);
+            await SendCommand(testCommand);
 
             return await Task.FromResult(true);
         }
@@ -226,7 +258,7 @@ namespace CANAnalyzerApp.Services
             }
         }
 
-        public async Task<bool> SendCommand(UInt32 command, UInt32 length)
+        public async Task<bool> SendCommand(UInt32 command)
         {
             if (!_isConnected)
                 return await Task.FromResult(false);

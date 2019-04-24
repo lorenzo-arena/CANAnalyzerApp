@@ -18,11 +18,11 @@ namespace CANAnalyzerApp.Views
     {
         CANSpyViewModel viewModel;
 
-        public CANSpyPage()
+        public CANSpyPage(int line)
         {
             InitializeComponent();
 
-            BindingContext = viewModel = new CANSpyViewModel();
+            BindingContext = viewModel = new CANSpyViewModel(line);
 
             foreach(var page in Children)
             {
