@@ -70,6 +70,20 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref applyMask, value); }
         }
 
+        string mask;
+        public string Mask
+        {
+            get { return mask; }
+            set { SetProperty(ref mask, value); }
+        }
+
+        string id;
+        public string ID
+        {
+            get { return id; }
+            set { SetProperty(ref id, value); }
+        }
+
         int lineNumber;
         public int LineNumber
         {
@@ -121,6 +135,22 @@ namespace CANAnalyzerApp.ViewModels
             StartCommand = new Command(async () => {
                 try
                 {
+                    var param = new CANSpyParameters();
+                    param.BitTiming = SelectedBitTiming;
+                    param.SamplingPoint = SelectedSamplingPoint;
+
+                    if (selectedFrameFormat == frameFormat11Bit)
+                        param.FrameFormat = CANSpyParameters.SimpleFrameFormat;
+                    else
+                        param.FrameFormat = CANSpyParameters.LongFrameFormat;
+
+                    param.ErrorReception = EnableErrorReception;
+                    param.ApplyMask = ApplyMask;
+                    param.Mask = Convert.ToUInt32(Mask, 16);
+                    param.ID = Convert.ToUInt32(ID, 16);
+
+
+
                     if (lineNumber == 1)
                         await AnalyzerDevice.StartSpyAsync(Services.SpyType.CANSpyOne);
                     else if (lineNumber == 2)

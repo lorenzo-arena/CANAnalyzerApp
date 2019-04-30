@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CANAnalyzerApp.Models;
 
 namespace CANAnalyzerApp.Services
 {
@@ -89,6 +90,7 @@ namespace CANAnalyzerApp.Services
                 _analyzerChar = characteristics.Find(x => x.Uuid == _analyzerCharacteristic);
 
                 _analyzerChar.ValueUpdated += OnCharacteristicValueUpdated;
+                await _analyzerChar.StartUpdatesAsync();
 
                 await GetDeviceInfo();
             }
@@ -136,12 +138,28 @@ namespace CANAnalyzerApp.Services
             return await Task.FromResult(true);
         }
 
-        public async Task<bool> SetCANParametersAsync(CANParam param)
+        public async Task<bool> SetCANParametersAsync(SpyType type, CANSpyParameters param)
         {
+            const UInt32 setParamCAN1Spy = 0x00010003;
+            const UInt32 setParamCAN2Spy = 0x00020003;
+
+            if (type == SpyType.CANSpyOne)
+            {
+                await SendReceiveInitCommand(4);
+                await SendCommand(setParamCAN1Spy);
+                await ReceiveFrame();
+            }
+            else if (type == SpyType.CANSpyTwo)
+            {
+                await SendReceiveInitCommand(4);
+                await SendCommand(setParamCAN2Spy);
+                await ReceiveFrame();
+            }
+
             return await Task.FromResult(true);
         }
 
-        public async Task<bool> SetKParametersAsync(KParam param)
+        public async Task<bool> SetKParametersAsync(SpyType type, KSpyParameters param)
         {
             return await Task.FromResult(true);
         }
@@ -149,7 +167,7 @@ namespace CANAnalyzerApp.Services
         public async Task<bool> StartSpyAsync(SpyType type)
         {
             const UInt32 startCAN1Spy = 0x00010001;
-            const UInt32 startCAN2Spy = 0x00010003;
+            const UInt32 startCAN2Spy = 0x00020001;
 
             if (type == SpyType.CANSpyOne)
             {
@@ -243,8 +261,7 @@ namespace CANAnalyzerApp.Services
                         ArrConverter.SetBufferFromUInt32(nextLength, frame, 0);
 
                         await SendFrame(frame);
-
-                        byte[] responseFrame = await ReceiveFrame();
+                        await ReceiveFrame();
 
                         return await Task.FromResult(true);
                     }
@@ -310,36 +327,45 @@ namespace CANAnalyzerApp.Services
 
         public async Task<byte[]> ReceiveFrame()
         {
-            if (!_isConnected)
-                return await Task.FromResult(new byte[0]);
-            else
+            try
+            {
+                if (!_isConnected)
+                    return await Task.FromResult(new byte[0]);
+                else
+                {
+                    await Task.Delay(100);
+                    await _analyzerChar.StopUpdatesAsync();
+
+                    if (_responseFrame == null || _responseFrame.Length == 0)
+                        throw new Exception("dimensione della risposta errata!");
+
+                    // Controllo il marker
+                    string marker = Encoding.ASCII.GetString(_responseFrame, 0, 4);
+                    if (marker != _frameMarker)
+                        throw new Exception("invalid marker");
+
+                    // Controllo il crc
+                    UInt32 crcSent = ArrConverter.GetUInt32FromBuffer(_responseFrame, _responseFrame.Length - 4);
+                    UInt32 crcCalc = Crc32_STM.CalculateFromBuffer(_responseFrame, _responseFrame.Length - 4);
+
+                    if (crcSent != crcCalc)
+                        throw new Exception("invalid crc");
+
+                    // Controllo se ho una risposta con codice di errore
+                    UInt32 errorCode = ArrConverter.GetUInt32FromBuffer(_responseFrame, 4);
+                    if (errorCode != 0)
+                        throw new Exception(errorCode.ToString());
+                }
+
+                await _analyzerChar.StartUpdatesAsync();
+
+                return await Task.FromResult(_responseFrame);
+            }
+            catch (Exception ex)
             {
                 await _analyzerChar.StartUpdatesAsync();
-                await Task.Delay(50);
-                await _analyzerChar.StopUpdatesAsync();
-
-                if (_responseFrame == null || _responseFrame.Length == 0)
-                    throw new Exception("dimensione della risposta errata!");
-
-                // Controllo il marker
-                string marker = Encoding.ASCII.GetString(_responseFrame, 0, 4);
-                if (marker != _frameMarker)
-                    throw new Exception("invalid marker");
-
-                // Controllo il crc
-                UInt32 crcSent = ArrConverter.GetUInt32FromBuffer(_responseFrame, _responseFrame.Length - 4);
-                UInt32 crcCalc = Crc32_STM.CalculateFromBuffer(_responseFrame, _responseFrame.Length - 4);
-
-                if (crcSent != crcCalc)
-                    throw new Exception("invalid crc");
-
-                // Controllo se ho una risposta con codice di errore
-                UInt32 errorCode = ArrConverter.GetUInt32FromBuffer(_responseFrame, 4);
-                if (errorCode != 0)
-                    throw new Exception(errorCode.ToString());
+                throw ex;
             }
-
-            return await Task.FromResult(_responseFrame);
         }
     }
 }
