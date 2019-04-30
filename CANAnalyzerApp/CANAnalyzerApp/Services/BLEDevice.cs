@@ -143,16 +143,33 @@ namespace CANAnalyzerApp.Services
             const UInt32 setParamCAN1Spy = 0x00010003;
             const UInt32 setParamCAN2Spy = 0x00020003;
 
+            byte[] paramData = new byte[CANSpyParameters.ParamSize];
+            ArrConverter.SetBufferFromUInt32((UInt32)param.BitTiming, paramData, 0);
+            ArrConverter.SetBufferFromUInt32((UInt32)param.FrameFormat, paramData, 4);
+
+            if(param.ErrorReception)
+                ArrConverter.SetBufferFromUInt32((UInt32)1, paramData, 8);
+            else
+                ArrConverter.SetBufferFromUInt32((UInt32)0, paramData, 8);
+
+            if (param.ApplyMask)
+                ArrConverter.SetBufferFromUInt32((UInt32)1, paramData, 12);
+            else
+                ArrConverter.SetBufferFromUInt32((UInt32)0, paramData, 12);
+
+            ArrConverter.SetBufferFromUInt32((UInt32)param.Mask, paramData, 16);
+            ArrConverter.SetBufferFromUInt32((UInt32)param.ID, paramData, 20);
+
             if (type == SpyType.CANSpyOne)
             {
                 await SendReceiveInitCommand(4);
-                await SendCommand(setParamCAN1Spy);
+                await SendCommandWithBuffer(setParamCAN1Spy, paramData);
                 await ReceiveFrame();
             }
             else if (type == SpyType.CANSpyTwo)
             {
                 await SendReceiveInitCommand(4);
-                await SendCommand(setParamCAN2Spy);
+                await SendCommandWithBuffer(setParamCAN2Spy, paramData);
                 await ReceiveFrame();
             }
 
@@ -287,6 +304,28 @@ namespace CANAnalyzerApp.Services
 
                     // Copio il codice del comando
                     ArrConverter.SetBufferFromUInt32(command, frame, 0);
+
+                    await SendFrame(frame);
+                }
+                else
+                    return await Task.FromResult(false);
+            }
+            return await Task.FromResult(true);
+        }
+
+        public async Task<bool> SendCommandWithBuffer(UInt32 command, byte[] buff)
+        {
+            if (!_isConnected)
+                return await Task.FromResult(false);
+            else
+            {
+                if (_analyzerChar != null)
+                {
+                    byte[] frame = new byte[4 + buff.Length];
+
+                    // Copio il codice del comando
+                    ArrConverter.SetBufferFromUInt32(command, frame, 0);
+                    buff.CopyTo(frame, 4);
 
                     await SendFrame(frame);
                 }

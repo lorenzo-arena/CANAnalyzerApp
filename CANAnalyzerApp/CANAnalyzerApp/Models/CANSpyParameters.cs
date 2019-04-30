@@ -8,10 +8,9 @@ namespace CANAnalyzerApp.Models
     {
         public const int SimpleFrameFormat = 11;
         public const int LongFrameFormat = 29;
+        public const int ParamSize = 24;
 
         public int BitTiming { get; set; }
-
-        public double SamplingPoint { get; set; }
 
         public int FrameFormat { get; set; }
 
