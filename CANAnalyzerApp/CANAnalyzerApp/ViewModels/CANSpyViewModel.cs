@@ -137,7 +137,7 @@ namespace CANAnalyzerApp.ViewModels
                 {
                     var param = new CANSpyParameters();
                     param.BitTiming = SelectedBitTiming;
-                    param.SamplingPoint = SelectedSamplingPoint;
+                    //param.SamplingPoint = SelectedSamplingPoint;
 
                     if (selectedFrameFormat == frameFormat11Bit)
                         param.FrameFormat = CANSpyParameters.SimpleFrameFormat;
@@ -152,9 +152,15 @@ namespace CANAnalyzerApp.ViewModels
 
 
                     if (lineNumber == 1)
+                    {
+                        await AnalyzerDevice.SetCANParametersAsync(Services.SpyType.CANSpyOne, param);
                         await AnalyzerDevice.StartSpyAsync(Services.SpyType.CANSpyOne);
+                    }
                     else if (lineNumber == 2)
+                    {
+                        await AnalyzerDevice.SetCANParametersAsync(Services.SpyType.CANSpyTwo, param);
                         await AnalyzerDevice.StartSpyAsync(Services.SpyType.CANSpyTwo);
+                    }
                 }
                 catch (Exception ex)
                 {
