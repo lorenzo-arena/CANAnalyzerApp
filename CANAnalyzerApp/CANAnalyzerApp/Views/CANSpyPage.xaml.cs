@@ -28,6 +28,21 @@ namespace CANAnalyzerApp.Views
             {
                 page.BindingContext = viewModel;
             }
+
+            MessagingCenter.Subscribe<CANSpyViewModel, string>(this, "StartError", async (sender, message) =>
+            {
+                await OnError(message);
+            });
+
+            MessagingCenter.Subscribe<CANSpyViewModel, string>(this, "StopError", async (sender, message) =>
+            {
+                await OnError(message);
+            });
+        }
+
+        private async Task OnError(string message)
+        {
+            await DisplayAlert("CANAnalyzer", message, "Ok");
         }
     }
 }

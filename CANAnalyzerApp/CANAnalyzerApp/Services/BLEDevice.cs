@@ -162,13 +162,13 @@ namespace CANAnalyzerApp.Services
 
             if (type == SpyType.CANSpyOne)
             {
-                await SendReceiveInitCommand(4);
+                await SendReceiveInitCommand((UInt32)(4 + paramData.Length));
                 await SendCommandWithBuffer(setParamCAN1Spy, paramData);
                 await ReceiveFrame();
             }
             else if (type == SpyType.CANSpyTwo)
             {
-                await SendReceiveInitCommand(4);
+                await SendReceiveInitCommand((UInt32)(4 + paramData.Length));
                 await SendCommandWithBuffer(setParamCAN2Spy, paramData);
                 await ReceiveFrame();
             }
