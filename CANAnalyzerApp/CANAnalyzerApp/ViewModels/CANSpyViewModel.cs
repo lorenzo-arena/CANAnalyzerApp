@@ -70,13 +70,37 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref applyMask, value); }
         }
 
+        string mask;
+        public string Mask
+        {
+            get { return mask; }
+            set { SetProperty(ref mask, value); }
+        }
+
+        string id;
+        public string ID
+        {
+            get { return id; }
+            set { SetProperty(ref id, value); }
+        }
+
+        int lineNumber;
+        public int LineNumber
+        {
+            get { return lineNumber; }
+            set { SetProperty(ref lineNumber, value); }
+        }
+
         public ICommand StartCommand { get; }
 
         public ICommand StopCommand { get; }
 
-        public CANSpyViewModel()
+        public CANSpyViewModel(int line)
         {
-            Title = "CAN Line 1";
+            if(line == 1)
+                Title = "CAN Line 1";
+            else
+                Title = "CAN Line 2";
 
             bitTimings = new List<int>();
             bitTimings.Add(50000);
@@ -106,12 +130,56 @@ namespace CANAnalyzerApp.ViewModels
             enableErrorReception = true;
             applyMask = false;
 
+            lineNumber = line;
+
             StartCommand = new Command(async () => {
-                // TODO : Implementare
+                try
+                {
+                    var param = new CANSpyParameters();
+                    param.BitTiming = SelectedBitTiming;
+                    //param.SamplingPoint = SelectedSamplingPoint;
+
+                    if (selectedFrameFormat == frameFormat11Bit)
+                        param.FrameFormat = CANSpyParameters.SimpleFrameFormat;
+                    else
+                        param.FrameFormat = CANSpyParameters.LongFrameFormat;
+
+                    param.ErrorReception = EnableErrorReception;
+                    param.ApplyMask = ApplyMask;
+                    param.Mask = Convert.ToUInt32(Mask, 16);
+                    param.ID = Convert.ToUInt32(ID, 16);
+
+
+
+                    if (lineNumber == 1)
+                    {
+                        await AnalyzerDevice.SetCANParametersAsync(Services.SpyType.CANSpyOne, param);
+                        await AnalyzerDevice.StartSpyAsync(Services.SpyType.CANSpyOne);
+                    }
+                    else if (lineNumber == 2)
+                    {
+                        await AnalyzerDevice.SetCANParametersAsync(Services.SpyType.CANSpyTwo, param);
+                        await AnalyzerDevice.StartSpyAsync(Services.SpyType.CANSpyTwo);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessagingCenter.Send<CANSpyViewModel, string>(this, "StartError", ex.Message);
+                }
             });
 
             StopCommand = new Command(async () => {
-                // TODO : Implementare
+                try
+                {
+                    if (lineNumber == 1)
+                        await AnalyzerDevice.StopSpyAsync(Services.SpyType.CANSpyOne);
+                    else if (lineNumber == 2)
+                        await AnalyzerDevice.StopSpyAsync(Services.SpyType.CANSpyTwo);
+                }
+                catch (Exception ex)
+                {
+                    MessagingCenter.Send<CANSpyViewModel, string>(this, "StopError", ex.Message);
+                }
             });
         }
     }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using CANAnalyzerApp.Models;
+
 namespace CANAnalyzerApp.Services
 {
     public enum SpyType
@@ -9,16 +11,6 @@ namespace CANAnalyzerApp.Services
         CANSpyOne,
         CANSpyTwo,
         KLineSpy
-    }
-
-    public struct CANParam
-    {
-        UInt32 bitrate;
-    }
-
-    public struct KParam
-    {
-        UInt32 bitrate;
     }
 
     public interface IAnalyzerDevice
@@ -32,8 +24,8 @@ namespace CANAnalyzerApp.Services
         Task<bool> ConnectToDeviceAsync();
         Task<bool> DisconnectFromDeviceAsync();
         Task<bool> TestCommandAsync();
-        Task<bool> SetCANParametersAsync(CANParam param);
-        Task<bool> SetKParametersAsync(KParam param);
+        Task<bool> SetCANParametersAsync(SpyType type, CANSpyParameters param);
+        Task<bool> SetKParametersAsync(SpyType type, KSpyParameters param);
         Task<bool> StartSpyAsync(SpyType type);
         Task<bool> StopSpyAsync(SpyType type);
     }

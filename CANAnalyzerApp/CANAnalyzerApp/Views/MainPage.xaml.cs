@@ -27,15 +27,18 @@ namespace CANAnalyzerApp.Views
                 switch (id)
                 {
                     case (int)MenuItemType.CANSpyOne:
+                    {
+                        var CANPage = new CANSpyPage(1);
+                        var CANNavPage = new NavigationPage(CANPage);
+                        CANNavPage.BarBackgroundColor = Color.FromHex("#282828");
+
+                        MenuPages.Add(id, CANNavPage);
+                        break;
+                    }
+
                     case (int)MenuItemType.CANSpyTwo:
                     {
-                        var CANPage = new CANSpyPage();
-
-                        if (id == (int)MenuItemType.CANSpyOne)
-                            CANPage.Title = "CAN Line 1";
-                        else if (id == (int)MenuItemType.CANSpyTwo)
-                            CANPage.Title = "CAN Line 2";
-
+                        var CANPage = new CANSpyPage(2);
                         var CANNavPage = new NavigationPage(CANPage);
                         CANNavPage.BarBackgroundColor = Color.FromHex("#282828");
 

@@ -14,7 +14,7 @@ namespace CANAnalyzerApp.Views
 	{
 		public SpyControlsPage ()
 		{
-			InitializeComponent ();
-		}
+			InitializeComponent ();            
+        }
 	}
 }
