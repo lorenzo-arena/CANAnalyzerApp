@@ -83,10 +83,22 @@ namespace CANAnalyzerApp.Services
             try
             {
                 await adapter.ConnectToDeviceAsync(device);
+                
+                _isConnected = true;
+            }
+            catch (Exception e)
+            {
+                // Non ho potuto connettermi al dispositivo
+                _isConnected = false;
+                _isConnecting = false;
+
+                throw e;
+            }
+
+            try
+            {
                 List<IService> services = (List<IService>)await device.GetServicesAsync();
                 List<ICharacteristic> characteristics = (List<ICharacteristic>)await services[1].GetCharacteristicsAsync();
-                _isConnected = true;
-
                 _analyzerChar = characteristics.Find(x => x.Uuid == _analyzerCharacteristic);
 
                 _analyzerChar.ValueUpdated += OnCharacteristicValueUpdated;
@@ -96,9 +108,12 @@ namespace CANAnalyzerApp.Services
             }
             catch (Exception e)
             {
-                // ... could not connect to device
+                // C'è stato un errore successivamente
                 _isConnected = false;
                 _isConnecting = false;
+
+                await adapter.DisconnectDeviceAsync(device);
+
                 throw e;
             }
 
@@ -250,11 +265,14 @@ namespace CANAnalyzerApp.Services
 
         public async Task<bool> TestCommandAsync()
         {
-            const UInt32 testCommand = 0x3F3F3F3F;
+            const UInt32 blinkCommand = 0x3F3F0000;
+            const UInt32 sleepCommand = 0x3F3F0001;
 
             await SendReceiveInitCommand(4);
 
-            await SendCommand(testCommand);
+            //await SendCommand(blinkCommand);
+            await SendCommand(sleepCommand);
+            await ReceiveFrame();
 
             return await Task.FromResult(true);
         }
@@ -366,34 +384,49 @@ namespace CANAnalyzerApp.Services
 
         public async Task<byte[]> ReceiveFrame()
         {
+            const UInt32 waitCommand = 0x00040000;
             try
             {
                 if (!_isConnected)
                     return await Task.FromResult(new byte[0]);
                 else
                 {
-                    await Task.Delay(100);
-                    await _analyzerChar.StopUpdatesAsync();
+                    bool isWaitCommand = false;
 
-                    if (_responseFrame == null || _responseFrame.Length == 0)
-                        throw new Exception("dimensione della risposta errata!");
+                    do
+                    {
+                        await Task.Delay(100);
+                        await _analyzerChar.StopUpdatesAsync();
 
-                    // Controllo il marker
-                    string marker = Encoding.ASCII.GetString(_responseFrame, 0, 4);
-                    if (marker != _frameMarker)
-                        throw new Exception("invalid marker");
+                        if (_responseFrame == null || _responseFrame.Length == 0)
+                            throw new Exception("dimensione della risposta errata!");
 
-                    // Controllo il crc
-                    UInt32 crcSent = ArrConverter.GetUInt32FromBuffer(_responseFrame, _responseFrame.Length - 4);
-                    UInt32 crcCalc = Crc32_STM.CalculateFromBuffer(_responseFrame, _responseFrame.Length - 4);
+                        // Controllo il marker
+                        string marker = Encoding.ASCII.GetString(_responseFrame, 0, 4);
+                        if (marker != _frameMarker)
+                            throw new Exception("invalid marker");
 
-                    if (crcSent != crcCalc)
-                        throw new Exception("invalid crc");
+                        // Controllo il crc
+                        UInt32 crcSent = ArrConverter.GetUInt32FromBuffer(_responseFrame, _responseFrame.Length - 4);
+                        UInt32 crcCalc = Crc32_STM.CalculateFromBuffer(_responseFrame, _responseFrame.Length - 4);
 
-                    // Controllo se ho una risposta con codice di errore
-                    UInt32 errorCode = ArrConverter.GetUInt32FromBuffer(_responseFrame, 4);
-                    if (errorCode != 0)
-                        throw new Exception(errorCode.ToString());
+                        if (crcSent != crcCalc)
+                            throw new Exception("invalid crc");
+
+                        // Controllo se ho una risposta con codice di errore
+                        UInt32 errorCode = ArrConverter.GetUInt32FromBuffer(_responseFrame, 4);
+                        if (errorCode != 0)
+                            throw new Exception(errorCode.ToString());
+
+                        if(_responseFrame.Length == 16)
+                        {
+                            if (ArrConverter.GetUInt32FromBuffer(_responseFrame, 8) == waitCommand)
+                                isWaitCommand = true;
+                        }
+
+                        await _analyzerChar.StartUpdatesAsync();
+                    }
+                    while (isWaitCommand);
                 }
 
                 await _analyzerChar.StartUpdatesAsync();

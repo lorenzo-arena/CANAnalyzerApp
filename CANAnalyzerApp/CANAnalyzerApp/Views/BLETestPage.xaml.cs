@@ -33,8 +33,16 @@ namespace CANAnalyzerApp.Views
             {
                 await DisplayAlert("CANAnalyzer", "Connessioni fallita.", "Ok");
             });
+
+            MessagingCenter.Subscribe<CANSpyViewModel, string>(this, "TestError", async (sender, message) =>
+            {
+                await OnError(message);
+            });
         }
 
-        
-	}
+        private async Task OnError(string message)
+        {
+            await DisplayAlert("CANAnalyzer", message, "Ok");
+        }
+    }
 }
