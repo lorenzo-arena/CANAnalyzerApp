@@ -108,7 +108,6 @@ namespace CANAnalyzerApp.ViewModels
             bitTimings.Add(125000);
             bitTimings.Add(200000);
             bitTimings.Add(250000);
-            bitTimings.Add(300000);
             bitTimings.Add(400000);
             bitTimings.Add(500000);
             bitTimings.Add(1000000);
