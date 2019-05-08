@@ -40,7 +40,7 @@
                     Type=RelativeToParent,
                     Property=Height,
                     Factor=0.05}"
-                    Command="{Binding StartCommand}"></Button>
+                    Command="{Binding StopCommand}"></Button>
             <Label RelativeLayout.XConstraint = "{ConstraintExpression 
                    Type=RelativeToParent,
                    Property=Width,

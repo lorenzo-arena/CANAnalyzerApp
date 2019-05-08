@@ -32,10 +32,17 @@ namespace CANAnalyzerApp.ViewModels
             });
 
             TestCommand = new Command(async () => {
-                if (await AnalyzerDevice.TestCommandAsync())
-                    MessagingCenter.Send(this, "DeviceTestOk");
-                else
-                    MessagingCenter.Send(this, "DeviceTestFailed");
+                try
+                {
+                    if (await AnalyzerDevice.TestCommandAsync())
+                        MessagingCenter.Send(this, "DeviceTestOk");
+                    else
+                        MessagingCenter.Send(this, "DeviceTestFailed");
+                }
+                catch (Exception ex)
+                {
+                    MessagingCenter.Send<BLETestViewModel, string>(this, "TestError", ex.Message);
+                }
             });
         }
     }

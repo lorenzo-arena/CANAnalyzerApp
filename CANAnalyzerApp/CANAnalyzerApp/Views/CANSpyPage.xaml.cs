@@ -18,16 +18,31 @@ namespace CANAnalyzerApp.Views
     {
         CANSpyViewModel viewModel;
 
-        public CANSpyPage()
+        public CANSpyPage(int line)
         {
             InitializeComponent();
 
-            BindingContext = viewModel = new CANSpyViewModel();
+            BindingContext = viewModel = new CANSpyViewModel(line);
 
             foreach(var page in Children)
             {
                 page.BindingContext = viewModel;
             }
+
+            MessagingCenter.Subscribe<CANSpyViewModel, string>(this, "StartError", async (sender, message) =>
+            {
+                await OnError(message);
+            });
+
+            MessagingCenter.Subscribe<CANSpyViewModel, string>(this, "StopError", async (sender, message) =>
+            {
+                await OnError(message);
+            });
+        }
+
+        private async Task OnError(string message)
+        {
+            await DisplayAlert("CANAnalyzer", message, "Ok");
         }
     }
 }
