@@ -167,4 +167,7 @@
   <ItemGroup>
     <BundleResource Include="Resources\SplashScreenLogo.png" />
   </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\rightarrow.png" />
+  </ItemGroup>
 </Project>

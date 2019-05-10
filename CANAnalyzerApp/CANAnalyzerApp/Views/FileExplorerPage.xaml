@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:app="clr-namespace:CANAnalyzerApp"
+             xmlns:local="clr-namespace:CANAnalyzerApp.Views"
+             x:Class="CANAnalyzerApp.Views.FileExplorerPage"
+             BackgroundColor="#EFEFF4"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!--Page Level Resources: Compatible with Xamarin Live Player -->
+            <Color x:Key="BackgroundColor">#282828</Color>
+            <Color x:Key="LightBackgroundColor">#858585</Color>
+            <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
+            <Color x:Key="ForegroundDarkColor">#101010</Color>
+            <Color x:Key="LogoColor">#DE0000</Color>
+            <app:NegateBooleanConverter x:Key="inverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.Content>
+        <StackLayout>
+            <TableView Intent="Settings">
+                <TableRoot>
+                    <TableSection Title="">
+                        <ViewCell x:Name="CAN1LineViewCell"
+                                  Tapped="ViewCell_Tapped">
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="CAN 1 Line"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Image Source="rightarrow.png"
+                                       HorizontalOptions="EndAndExpand"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="0,10,15,10"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <ViewCell x:Name="CAN2LineViewCell"
+                                  Tapped="ViewCell_Tapped">
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="CAN 2 Line"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Image Source="rightarrow.png"
+                                       HorizontalOptions="EndAndExpand"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="0,10,15,10"/>
+                            </StackLayout>
+                        </ViewCell>
+                        <ViewCell x:Name="KLineViewCell"
+                                  Tapped="ViewCell_Tapped">
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="K Line"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="15,0,0,0"/>
+                                <Image Source="rightarrow.png"
+                                       HorizontalOptions="EndAndExpand"
+                                       VerticalOptions="CenterAndExpand"
+                                       Margin="0,10,15,10"/>
+                            </StackLayout>
+                        </ViewCell>
+                    </TableSection>
+                </TableRoot>
+            </TableView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

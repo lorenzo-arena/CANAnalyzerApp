@@ -11,6 +11,7 @@ namespace CANAnalyzerApp.Models
         CANSpyTwo,
         KLineSpy,
         DeviceSettings,
+        FileExplorer,
         BLETest
     }
     public class HomeMenuItem
