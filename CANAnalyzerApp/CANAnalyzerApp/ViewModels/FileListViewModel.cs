@@ -17,16 +17,12 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref files, value); }
         }
 
-        public FileListViewModel()
+        public FileListViewModel(SpyFileType fileType)
         {
             Files = new List<SpyFile>();
-
-            Files.Add(new SpyFile { FileName = "1.txt" });
-            Files.Add(new SpyFile { FileName = "2.txt" });
-            Files.Add(new SpyFile { FileName = "3.txt" });
-            Files.Add(new SpyFile { FileName = "4.txt" });
-            Files.Add(new SpyFile { FileName = "5.txt" });
         }
+
+        public async
 
     }
 }

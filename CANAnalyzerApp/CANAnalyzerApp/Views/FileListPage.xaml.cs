@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using CANAnalyzerApp.ViewModels;
+using CANAnalyzerApp.Models;
 
 namespace CANAnalyzerApp.Views
 {
@@ -15,7 +16,7 @@ namespace CANAnalyzerApp.Views
 	{
         FileListViewModel viewModel;
 
-        public FileListPage ()
+        public FileListPage (SpyFileType fileType)
 		{
             // Appena creata la pagina deve contenere la lista vuota;
             // lo spinner e' attivo mentre la pagina aspetta il messaggio dal ViewModel
@@ -25,7 +26,7 @@ namespace CANAnalyzerApp.Views
             // che quando premuto esegue un command?
 			InitializeComponent ();
 
-            BindingContext = viewModel = new FileListViewModel();
+            BindingContext = viewModel = new FileListViewModel(fileType);
         }
 
         private void ViewCell_Tapped(object sender, EventArgs e)

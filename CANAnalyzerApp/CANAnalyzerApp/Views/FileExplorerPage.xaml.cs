@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
+using CANAnalyzerApp.Models;
+
 namespace CANAnalyzerApp.Views
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
@@ -19,19 +21,19 @@ namespace CANAnalyzerApp.Views
 
         private void ViewCell_Tapped(object sender, EventArgs e)
         {
+            // Quando clicco una cella apro la pagina con la lista dei file del tipo scelto
             if((sender as ViewCell) == CAN1LineViewCell)
             {
                 // Faccio il push della pagina contenente la lista
-                DisplayAlert("Titolo", "CAN 1", "OK");
-                Navigation.PushAsync(new FileListPage());
+                Navigation.PushAsync(new FileListPage(SpyFileType.FileTypeCAN1));
             }
             else if ((sender as ViewCell) == CAN2LineViewCell)
             {
-                DisplayAlert("Titolo", "CAN 2", "OK");
+                Navigation.PushAsync(new FileListPage(SpyFileType.FileTypeCAN2));
             }
             else if ((sender as ViewCell) == KLineViewCell)
             {
-                DisplayAlert("Titolo", "K", "OK");
+                Navigation.PushAsync(new FileListPage(SpyFileType.FileTypeK));
             }
         }
     }
