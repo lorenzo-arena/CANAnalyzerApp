@@ -19,20 +19,20 @@
             <ActivityIndicator IsVisible="{Binding IsDownloading}"
                                IsRunning="{Binding IsDownloading}"
                                Color="{StaticResource LogoColor}"/>
+            <!--Controllare colori-->
             <ListView x:Name="ListViewMenu"
                       HasUnevenRows="False"
-                      SelectionMode="None"
+                      SelectionMode="Single"
+                      IsPullToRefreshEnabled="False"
                       ItemsSource="{Binding Files}"
-                      IsVisible="{Binding IsDownloading, Converter={StaticResource Inverter}}">
+                      IsVisible="{Binding IsDownloading, Converter={StaticResource Inverter}}"
+                      SelectedItem="{Binding SelectedFile}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <ViewCell Tapped="ViewCell_Tapped">
-                            <StackLayout Orientation="Horizontal">
-                                <Label VerticalOptions="CenterAndExpand"
-                                       Margin="15,0,0,0"
-                                       Text="{Binding FileName}"/>
-                            </StackLayout>
-                        </ViewCell>
+                        <!--Controllare se la modalità testo è compatibile-->
+                        <!--con la selezione e il fire del command-->
+                        <TextCell Text="{Binding FileName}"
+                                  Command="{Binding DownloadFileCommand}"/>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

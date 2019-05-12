@@ -290,6 +290,26 @@ namespace CANAnalyzerApp.Services
             return files;
         }
 
+        public async Task<byte[]> GetSpyFile(SpyFileType type, string fileName)
+        {
+            UInt32 getFileCommand;
+
+            if (type == SpyFileType.FileTypeCAN1)
+                getFileCommand = 0x00000006;
+            else if (type == SpyFileType.FileTypeCAN2)
+                getFileCommand = 0x00000007;
+            else if (type == SpyFileType.FileTypeK)
+                getFileCommand = 0x00000008;
+            else
+                throw new Exception("FileType not implemented!");
+
+            await SendReceiveInitCommand(4 + (UInt32)fileName.Length);
+            await SendCommandWithBuffer(getFileCommand, Encoding.ASCII.GetBytes(fileName));
+            var response = await ReceiveFrame();
+
+            return response;
+        }
+
         public async Task<bool> TestCommandAsync()
         {
             const UInt32 blinkCommand = 0x3F3F0000;

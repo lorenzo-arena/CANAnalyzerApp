@@ -18,6 +18,13 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref files, value); }
         }
 
+        string selectedFile;
+        public string SelectedFile
+        {
+            get { return selectedFile; }
+            set { SetProperty(ref selectedFile, value); }
+        }
+
         bool isDownloading;
         public bool IsDownloading
         {
@@ -29,8 +36,25 @@ namespace CANAnalyzerApp.ViewModels
         {
             Files = new List<SpyFile>();
 
+            DownloadFileCommand = new Command(async () => {
+                try
+                {
+                    var fileContent = await AnalyzerDevice.GetSpyFile(fileType, selectedFile);
+
+                    // Devo condividere fileContent, che sarà un byte[]
+
+                    throw new Exception("Implementare la condivisione del file usando le API Essentials!");
+                }
+                catch (Exception ex)
+                {
+                    MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFileError", ex.Message);
+                }
+            });
+
             DownloadFilesList(fileType);
         }
+
+        public ICommand DownloadFileCommand { get; }
 
         private void DownloadFilesList(SpyFileType fileType)
         {
