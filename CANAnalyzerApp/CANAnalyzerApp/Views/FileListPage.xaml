@@ -1,13 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:app="clr-namespace:CANAnalyzerApp"
              x:Class="CANAnalyzerApp.Views.FileListPage">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!--Page Level Resources: Compatible with Xamarin Live Player -->
+            <Color x:Key="BackgroundColor">#282828</Color>
+            <Color x:Key="LightBackgroundColor">#858585</Color>
+            <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
+            <Color x:Key="ForegroundDarkColor">#101010</Color>
+            <Color x:Key="LogoColor">#DE0000</Color>
+            <app:NegateBooleanConverter x:Key="Inverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <ContentPage.Content>
         <StackLayout>
+            <ActivityIndicator IsVisible="{Binding IsDownloading}"
+                               IsRunning="{Binding IsDownloading}"
+                               Color="{StaticResource LogoColor}"/>
             <ListView x:Name="ListViewMenu"
                       HasUnevenRows="False"
                       SelectionMode="None"
-              ItemsSource="{Binding Files}">
+                      ItemsSource="{Binding Files}"
+                      IsVisible="{Binding IsDownloading, Converter={StaticResource Inverter}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell Tapped="ViewCell_Tapped">

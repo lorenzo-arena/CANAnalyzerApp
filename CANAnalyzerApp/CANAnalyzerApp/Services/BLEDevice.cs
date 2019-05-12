@@ -263,6 +263,33 @@ namespace CANAnalyzerApp.Services
             return await Task.FromResult(true);
         }
 
+        public async Task<List<SpyFile>> GetSpyFiles(SpyFileType type)
+        {
+            var files = new List<SpyFile>();
+
+            UInt32 getListCommand;
+
+            if (type == SpyFileType.FileTypeCAN1)
+                getListCommand = 0x00000003;
+            else if (type == SpyFileType.FileTypeCAN2)
+                getListCommand = 0x00000004;
+            else if (type == SpyFileType.FileTypeK)
+                getListCommand = 0x00000005;
+            else
+                throw new Exception("FileType not implemented!");
+
+            await SendReceiveInitCommand(4);
+            await SendCommand(getListCommand);
+            var response = await ReceiveFrame();
+
+            // La risposta è costituita dalle stringhe (NOMI) dei vari file separate
+            // da byte di fine stringa
+
+            throw new Exception("Implementare l'estrazione delle info!");
+
+            return files;
+        }
+
         public async Task<bool> TestCommandAsync()
         {
             const UInt32 blinkCommand = 0x3F3F0000;

@@ -15,7 +15,7 @@
             <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
             <Color x:Key="ForegroundDarkColor">#101010</Color>
             <Color x:Key="LogoColor">#DE0000</Color>
-            <app:NegateBooleanConverter x:Key="inverter"/>
+            <app:NegateBooleanConverter x:Key="Inverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 

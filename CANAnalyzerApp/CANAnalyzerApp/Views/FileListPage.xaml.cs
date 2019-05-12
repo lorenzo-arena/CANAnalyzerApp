@@ -27,6 +27,11 @@ namespace CANAnalyzerApp.Views
 			InitializeComponent ();
 
             BindingContext = viewModel = new FileListViewModel(fileType);
+
+            MessagingCenter.Subscribe<FileListViewModel, string>(this, "DownloadFilesListError", async (sender, message) =>
+            {
+                await DisplayAlert("CANAnalyzer", "An error occurred during the files list download.", "Ok");
+            });
         }
 
         private void ViewCell_Tapped(object sender, EventArgs e)
