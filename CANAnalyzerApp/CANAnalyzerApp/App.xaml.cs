@@ -2,6 +2,7 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using CANAnalyzerApp.Views;
+using Xamarin.Essentials;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace CANAnalyzerApp
@@ -13,6 +14,7 @@ namespace CANAnalyzerApp
         {
             InitializeComponent();
 
+            ExperimentalFeatures.Enable(ExperimentalFeatures.ShareFileRequest);
 
             MainPage = new MainPage();
         }

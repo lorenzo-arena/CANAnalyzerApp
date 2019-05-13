@@ -16,7 +16,8 @@
     </ContentPage.Resources>
     <ContentPage.Content>
         <StackLayout>
-            <ActivityIndicator IsVisible="{Binding IsDownloading}"
+            <ActivityIndicator Margin="0,40,0,0"
+                               IsVisible="{Binding IsDownloading}"
                                IsRunning="{Binding IsDownloading}"
                                Color="{StaticResource LogoColor}"/>
             <!--Controllare colori-->

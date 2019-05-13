@@ -267,25 +267,45 @@ namespace CANAnalyzerApp.Services
         {
             var files = new List<SpyFile>();
 
-            UInt32 getListCommand;
+            UInt32 getNumCommand;
+            UInt32 getFileNameCommand;
 
             if (type == SpyFileType.FileTypeCAN1)
-                getListCommand = 0x00000003;
+            {
+                getNumCommand = 0x00000003;
+                getFileNameCommand = 0x00000006;
+            }
             else if (type == SpyFileType.FileTypeCAN2)
-                getListCommand = 0x00000004;
+            {
+                getNumCommand = 0x00000004;
+                getFileNameCommand = 0x00000007;
+            }
             else if (type == SpyFileType.FileTypeK)
-                getListCommand = 0x00000005;
+            {
+                getNumCommand = 0x00000005;
+                getFileNameCommand = 0x00000008;
+            }
             else
                 throw new Exception("FileType not implemented!");
 
             await SendReceiveInitCommand(4);
-            await SendCommand(getListCommand);
-            var response = await ReceiveFrame();
+            await SendCommand(getNumCommand);
+            var getNumResponse = await ReceiveFrame();
 
-            // La risposta è costituita dalle stringhe (NOMI) dei vari file separate
-            // da byte di fine stringa
+            var filesNum = ArrConverter.GetUInt32FromBuffer(getNumResponse, 8);
 
-            throw new Exception("Implementare l'estrazione delle info!");
+            for(UInt32 fileIndex = 0; fileIndex < filesNum; fileIndex++)
+            {
+                var fileIndexBuf = new byte[4];
+                ArrConverter.SetBufferFromUInt32(fileIndex, fileIndexBuf, 0);
+
+                await SendReceiveInitCommand(8);
+                await SendCommandWithBuffer(getFileNameCommand, fileIndexBuf);
+                var getFileNameResponse = await ReceiveFrame();
+
+                var fileName = Encoding.ASCII.GetString(getFileNameResponse, 12, getFileNameResponse.Length - 16);
+                files.Add(new SpyFile { FileName = fileName });
+            }
 
             return files;
         }
@@ -295,11 +315,11 @@ namespace CANAnalyzerApp.Services
             UInt32 getFileCommand;
 
             if (type == SpyFileType.FileTypeCAN1)
-                getFileCommand = 0x00000006;
+                getFileCommand = 0x00000009;
             else if (type == SpyFileType.FileTypeCAN2)
-                getFileCommand = 0x00000007;
+                getFileCommand = 0x0000000A;
             else if (type == SpyFileType.FileTypeK)
-                getFileCommand = 0x00000008;
+                getFileCommand = 0x0000000B;
             else
                 throw new Exception("FileType not implemented!");
 
@@ -432,6 +452,7 @@ namespace CANAnalyzerApp.Services
         public async Task<byte[]> ReceiveFrame()
         {
             const UInt32 waitCommand = 0x00040000;
+            const UInt32 packetCommand = 0x3F3F3F3F;
             try
             {
                 if (!_isConnected)
@@ -451,7 +472,13 @@ namespace CANAnalyzerApp.Services
                         // Controllo il marker
                         string marker = Encoding.ASCII.GetString(_responseFrame, 0, 4);
                         if (marker != _frameMarker)
-                            throw new Exception("invalid marker");
+                        {
+                            string tmp = "";
+                            foreach (byte data in _responseFrame)
+                                tmp += data.ToString("X2");
+
+                            throw new Exception("invalid marker, received: " + tmp);
+                        }
 
                         // Controllo il crc
                         UInt32 crcSent = ArrConverter.GetUInt32FromBuffer(_responseFrame, _responseFrame.Length - 4);
@@ -469,6 +496,36 @@ namespace CANAnalyzerApp.Services
                         {
                             if (ArrConverter.GetUInt32FromBuffer(_responseFrame, 8) == waitCommand)
                                 isWaitCommand = true;
+                        }
+                        else if (_responseFrame.Length == 20)
+                        {
+                            if (ArrConverter.GetUInt32FromBuffer(_responseFrame, 8) == packetCommand)
+                            {
+                                int totalSize = (int)ArrConverter.GetUInt32FromBuffer(_responseFrame, 12);
+                                int packetsNum = ((totalSize % 20) == 0) ? (totalSize / 20) : ((totalSize / 20) + 1);
+
+                                var fullResponse = new byte[totalSize];
+
+                                // Il device cerca di trasmettere un pacchetto
+                                await _analyzerChar.StartUpdatesAsync();
+                                await SendCommand(packetCommand);
+
+                                for(var packetIndex = 0; packetIndex < packetsNum; packetIndex++)
+                                {
+                                    await Task.Delay(100);
+                                    await _analyzerChar.StopUpdatesAsync();
+
+                                    if (_responseFrame == null || _responseFrame.Length == 0)
+                                        throw new Exception("dimensione della risposta errata!");
+
+                                    _responseFrame.CopyTo(fullResponse, 20 * packetIndex);
+
+                                    await _analyzerChar.StartUpdatesAsync();
+                                    await SendCommand(packetCommand);
+                                }
+
+                                return await Task.FromResult(fullResponse);
+                            }
                         }
 
                         await _analyzerChar.StartUpdatesAsync();

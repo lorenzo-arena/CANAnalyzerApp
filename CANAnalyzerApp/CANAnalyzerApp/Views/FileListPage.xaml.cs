@@ -8,6 +8,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using CANAnalyzerApp.ViewModels;
 using CANAnalyzerApp.Models;
+using Xamarin.Essentials;
 
 namespace CANAnalyzerApp.Views
 {
@@ -15,6 +16,11 @@ namespace CANAnalyzerApp.Views
 	public partial class FileListPage : ContentPage
 	{
         FileListViewModel viewModel;
+
+        public FileListPage()
+        {
+            InitializeComponent();
+        }
 
         public FileListPage (SpyFileType fileType)
 		{
@@ -26,12 +32,17 @@ namespace CANAnalyzerApp.Views
             // che quando premuto esegue un command?
 			InitializeComponent ();
 
-            BindingContext = viewModel = new FileListViewModel(fileType);
-
             MessagingCenter.Subscribe<FileListViewModel, string>(this, "DownloadFilesListError", async (sender, message) =>
             {
                 await DisplayAlert("CANAnalyzer", "An error occurred during the files list download.", "Ok");
             });
+
+            MessagingCenter.Subscribe<FileListViewModel, string>(this, "DownloadFileError", async (sender, message) =>
+            {
+                await DisplayAlert("CANAnalyzer", "An error occurred during the file download.", "Ok");
+            });
+
+            BindingContext = viewModel = new FileListViewModel(fileType);
         }
     }
 }

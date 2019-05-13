@@ -6,6 +6,8 @@ using System.Windows.Input;
 using Xamarin.Forms;
 using CANAnalyzerApp.Models;
 using System.Threading.Tasks;
+using System.IO;
+using Xamarin.Essentials;
 
 namespace CANAnalyzerApp.ViewModels
 {
@@ -37,13 +39,20 @@ namespace CANAnalyzerApp.ViewModels
             Files = new List<SpyFile>();
 
             DownloadFileCommand = new Command(async () => {
+                MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFileError", "");
                 try
                 {
                     var fileContent = await AnalyzerDevice.GetSpyFile(fileType, selectedFile);
 
                     // Devo condividere fileContent, che sarà un byte[]
+                    var filePath = Path.Combine(FileSystem.CacheDirectory, selectedFile);
+                    File.WriteAllBytes(filePath, fileContent);
 
-                    throw new Exception("Implementare la condivisione del file usando le API Essentials!");
+                    await Share.RequestAsync(new ShareFileRequest
+                    {
+                        Title = Path.GetFileNameWithoutExtension(selectedFile),
+                        File = new ShareFile(filePath)
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -68,7 +77,7 @@ namespace CANAnalyzerApp.ViewModels
                 }
                 catch(Exception ex)
                 {
-                    MessagingCenter.Send(this, "DownloadFilesListError");
+                    MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFilesListError", ex.Message);
                 }
 
                 IsDownloading = false;

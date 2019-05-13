@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Input;
 using Xamarin.Forms;
+using Xamarin.Essentials;
+using System.IO;
 
 namespace CANAnalyzerApp.ViewModels
 {
