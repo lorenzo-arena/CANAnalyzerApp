@@ -21,5 +21,7 @@ namespace CANAnalyzerApp.Models
         public string Title { get; set; }
 
         public Color Foreground { get; set; }
+
+        public bool Enabled { get; set; }
     }
 }

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
+using CANAnalyzerApp.ViewModels;
+
 namespace CANAnalyzerApp.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
@@ -12,45 +14,53 @@ namespace CANAnalyzerApp.Views
     {
         MainPage RootPage { get => Application.Current.MainPage as MainPage; }
         List<HomeMenuItem> menuItems;
+
         public MenuPage()
         {
             InitializeComponent();
 
             menuItems = new List<HomeMenuItem>
             {
-                new HomeMenuItem {Id = MenuItemType.DeviceSettings, Title="Device Settings", Foreground = Color.FromHex("#282828") },
-                new HomeMenuItem {Id = MenuItemType.CANSpyOne, Title="CAN Line 1", Foreground = Color.FromHex("#F0F0F0") },
-                new HomeMenuItem {Id = MenuItemType.CANSpyTwo, Title="CAN Line 2", Foreground = Color.FromHex("#F0F0F0") },
-                //new HomeMenuItem {Id = MenuItemType.KLineSpy, Title="K Line", Foreground = Color.FromHex("#F0F0F0") },
-                new HomeMenuItem {Id = MenuItemType.FileExplorer, Title="File Explorer", Foreground = Color.FromHex("#F0F0F0") },
-                //new HomeMenuItem {Id = MenuItemType.BLETest, Title="BLE Test", Foreground = Color.FromHex("#F0F0F0") }
+                new HomeMenuItem {Id = MenuItemType.DeviceSettings, Title="Device Settings", Foreground = Color.FromHex("#F0F0F0"), Enabled = true },
+                new HomeMenuItem {Id = MenuItemType.CANSpyOne, Title="CAN Line 1", Foreground = Color.FromHex("#8F8F8F"), Enabled = false },
+                new HomeMenuItem {Id = MenuItemType.CANSpyTwo, Title="CAN Line 2", Foreground = Color.FromHex("#8F8F8F"), Enabled = false },
+                //new HomeMenuItem {Id = MenuItemType.KLineSpy, Title="K Line", Foreground = Color.FromHex("#8F8F8F"), Enabled = false },
+                new HomeMenuItem {Id = MenuItemType.FileExplorer, Title="File Explorer", Foreground = Color.FromHex("#8F8F8F"), Enabled = false },
+                //new HomeMenuItem {Id = MenuItemType.BLETest, Title="BLE Test", Foreground = Color.FromHex("#8F8F8F"), Enabled = false }
             };
 
             ListViewMenu.ItemsSource = menuItems;
 
-            ListViewMenu.SelectedItem = menuItems[0];
-            ListViewMenu.ItemSelected += async (sender, e) =>
+            ListViewMenu.ItemTapped += async (sender, e) =>
             {
-                if (e.SelectedItem == null)
+                if (e.Item == null)
                     return;
 
-                // Imposto il foreground della voce selezionata in grigio
-                // e tutte le altre in bianco per ripristinare la precedente
+                ListViewMenu.SelectedItem = null;
 
-                foreach(HomeMenuItem item in menuItems)
-                {
-                    if(item == (HomeMenuItem)e.SelectedItem)
-                        item.Foreground = Color.FromHex("#282828");
-                    else
-                        item.Foreground = Color.FromHex("#F0F0F0");
-                }
-
-                ListViewMenu.ItemsSource = null;
-                ListViewMenu.ItemsSource = menuItems;
-
-                var id = (int)((HomeMenuItem)e.SelectedItem).Id;
+                var id = (int)((HomeMenuItem)e.Item).Id;
                 await RootPage.NavigateFromMenu(id);
-            }; 
+            };
+
+            MessagingCenter.Subscribe<DeviceSettingsViewModel>(this, "DeviceConnectedOk", (obj) =>
+            {
+                EnableMenuItems();
+            });
+        }
+
+        public void EnableMenuItems()
+        {
+            foreach (HomeMenuItem item in menuItems)
+            {
+                if(item.Title != "Device Settings")
+                {
+                    item.Enabled = true;
+                    item.Foreground = Color.FromHex("#F0F0F0");
+                }
+            }
+
+            ListViewMenu.ItemsSource = null;
+            ListViewMenu.ItemsSource = menuItems;
         }
     }
 }

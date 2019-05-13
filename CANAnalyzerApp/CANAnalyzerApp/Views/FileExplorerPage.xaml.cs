@@ -31,10 +31,12 @@ namespace CANAnalyzerApp.Views
             {
                 Navigation.PushAsync(new FileListPage(SpyFileType.FileTypeCAN2));
             }
+            /*
             else if ((sender as ViewCell) == KLineViewCell)
             {
                 Navigation.PushAsync(new FileListPage(SpyFileType.FileTypeK));
             }
+            */
         }
     }
 }

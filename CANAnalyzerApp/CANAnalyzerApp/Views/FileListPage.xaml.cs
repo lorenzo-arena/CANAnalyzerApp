@@ -33,11 +33,5 @@ namespace CANAnalyzerApp.Views
                 await DisplayAlert("CANAnalyzer", "An error occurred during the files list download.", "Ok");
             });
         }
-
-        private void ViewCell_Tapped(object sender, EventArgs e)
-        {
-            // TEMPORANEO : BAD DESIGN
-            DisplayAlert("Test", "testtest", "OK");
-        }
     }
 }
