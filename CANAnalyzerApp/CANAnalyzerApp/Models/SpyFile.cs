@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Input;
 
 namespace CANAnalyzerApp.Models
 {
@@ -14,5 +15,7 @@ namespace CANAnalyzerApp.Models
     public class SpyFile
     {
         public string FileName { get; set; }
+
+        public ICommand ItemTappedCommand { get; set; }
     }
 }

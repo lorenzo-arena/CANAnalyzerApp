@@ -263,9 +263,9 @@ namespace CANAnalyzerApp.Services
             return await Task.FromResult(true);
         }
 
-        public async Task<List<SpyFile>> GetSpyFiles(SpyFileType type)
+        public async Task<List<string>> GetSpyFileNames(SpyFileType type)
         {
-            var files = new List<SpyFile>();
+            var files = new List<string>();
 
             UInt32 getNumCommand;
             UInt32 getFileNameCommand;
@@ -304,7 +304,7 @@ namespace CANAnalyzerApp.Services
                 var getFileNameResponse = await ReceiveFrame();
 
                 var fileName = Encoding.ASCII.GetString(getFileNameResponse, 12, getFileNameResponse.Length - 16);
-                files.Add(new SpyFile { FileName = fileName });
+                files.Add(fileName);
             }
 
             return files;
@@ -312,6 +312,7 @@ namespace CANAnalyzerApp.Services
 
         public async Task<byte[]> GetSpyFile(SpyFileType type, string fileName)
         {
+            byte[] fileNameBuff = new byte[20];
             UInt32 getFileCommand;
 
             if (type == SpyFileType.FileTypeCAN1)
@@ -323,8 +324,13 @@ namespace CANAnalyzerApp.Services
             else
                 throw new Exception("FileType not implemented!");
 
-            await SendReceiveInitCommand(4 + (UInt32)fileName.Length);
-            await SendCommandWithBuffer(getFileCommand, Encoding.ASCII.GetBytes(fileName));
+            if (fileName.Length <= fileNameBuff.Length)
+                Encoding.ASCII.GetBytes(fileName).CopyTo(fileNameBuff, 0);
+            else
+                throw new Exception("Nome del file troppo lungo!");
+
+            await SendReceiveInitCommand(4 + (UInt32)fileNameBuff.Length);
+            await SendCommandWithBuffer(getFileCommand, fileNameBuff);
             var response = await ReceiveFrame();
 
             return response;

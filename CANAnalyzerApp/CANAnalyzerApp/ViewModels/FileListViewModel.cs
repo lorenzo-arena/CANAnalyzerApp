@@ -20,13 +20,6 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref files, value); }
         }
 
-        string selectedFile;
-        public string SelectedFile
-        {
-            get { return selectedFile; }
-            set { SetProperty(ref selectedFile, value); }
-        }
-
         bool isDownloading;
         public bool IsDownloading
         {
@@ -34,23 +27,24 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref isDownloading, value); }
         }
 
+        private ICommand downloadFileCommand;
+
         public FileListViewModel(SpyFileType fileType)
         {
             Files = new List<SpyFile>();
 
-            DownloadFileCommand = new Command(async () => {
-                MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFileError", "");
+            downloadFileCommand = new Command<string>(async (fileName) => {
                 try
                 {
-                    var fileContent = await AnalyzerDevice.GetSpyFile(fileType, selectedFile);
+                    var fileContent = await AnalyzerDevice.GetSpyFile(fileType, fileName);
 
                     // Devo condividere fileContent, che sarà un byte[]
-                    var filePath = Path.Combine(FileSystem.CacheDirectory, selectedFile);
+                    var filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
                     File.WriteAllBytes(filePath, fileContent);
 
                     await Share.RequestAsync(new ShareFileRequest
                     {
-                        Title = Path.GetFileNameWithoutExtension(selectedFile),
+                        Title = Path.GetFileNameWithoutExtension(fileName),
                         File = new ShareFile(filePath)
                     });
                 }
@@ -63,17 +57,22 @@ namespace CANAnalyzerApp.ViewModels
             DownloadFilesList(fileType);
         }
 
-        public ICommand DownloadFileCommand { get; }
-
         private void DownloadFilesList(SpyFileType fileType)
         {
             IsDownloading = true;
+
+            List<string> fileNames = new List<string>();
 
             Task.Run(async () =>
             {
                 try
                 {
-                    Files = await AnalyzerDevice.GetSpyFiles(fileType);
+                    fileNames = await AnalyzerDevice.GetSpyFileNames(fileType);
+
+                    foreach(string fileName in fileNames)
+                    {
+                        Files.Add(new SpyFile { FileName = fileName, ItemTappedCommand = downloadFileCommand });
+                    }
                 }
                 catch(Exception ex)
                 {

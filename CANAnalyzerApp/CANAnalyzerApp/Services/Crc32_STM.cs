@@ -40,8 +40,13 @@ namespace CANAnalyzerApp.Services
 
         public static UInt32 CalculateFromBuffer(byte[] buffBytes, int length)
         {
-            UInt32[] buff = new UInt32[length / 4];
+            UInt32[] buff = new UInt32[(length % 4) == 0 ? (length / 4) : ((int)(length / 4) + 1)];
             Buffer.BlockCopy(buffBytes, 0, buff, 0, length);
+
+            if((length % 4) != 0)
+            {
+                buff[buff.Length - 1] = buff[buff.Length - 1] << (8 * (4 - (length % 4)));
+            }
 
             UInt32 crcValue = 0xFFFFFFFFu;
             for (int index = 0; index < buff.Length; index++)

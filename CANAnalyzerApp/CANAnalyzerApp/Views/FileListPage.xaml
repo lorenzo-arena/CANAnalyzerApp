@@ -23,17 +23,17 @@
             <!--Controllare colori-->
             <ListView x:Name="ListViewMenu"
                       HasUnevenRows="False"
-                      SelectionMode="Single"
+                      SelectionMode="None"
                       IsPullToRefreshEnabled="False"
                       ItemsSource="{Binding Files}"
-                      IsVisible="{Binding IsDownloading, Converter={StaticResource Inverter}}"
-                      SelectedItem="{Binding SelectedFile}">
+                      IsVisible="{Binding IsDownloading, Converter={StaticResource Inverter}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <!--Controllare se la modalità testo è compatibile-->
                         <!--con la selezione e il fire del command-->
                         <TextCell Text="{Binding FileName}"
-                                  Command="{Binding DownloadFileCommand}"/>
+                                  Command="{Binding ItemTappedCommand}"
+                                  CommandParameter="{Binding FileName}"/>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
