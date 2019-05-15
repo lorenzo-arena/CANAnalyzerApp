@@ -15,7 +15,8 @@ namespace CANAnalyzerApp.Views
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class FileListPage : ContentPage
 	{
-        FileListViewModel viewModel;
+        FileListViewModel _viewModel;
+        SpyFileType _fileType;
 
         public FileListPage()
         {
@@ -42,7 +43,20 @@ namespace CANAnalyzerApp.Views
                 await DisplayAlert("CANAnalyzer", "An error occurred during the file download.", "Ok");
             });
 
-            BindingContext = viewModel = new FileListViewModel(fileType);
+            _viewModel = new FileListViewModel(fileType);
+            BindingContext = _viewModel;
+
+            _fileType = fileType;
+        }
+
+        protected async override void OnAppearing()
+        {
+            await _viewModel.DownloadFilesList(_fileType);
+ 
+            // Faccio un taccone per adesso,
+            // dissocio e riassocio il BindingContext
+            BindingContext = null;
+            BindingContext = _viewModel;
         }
     }
 }

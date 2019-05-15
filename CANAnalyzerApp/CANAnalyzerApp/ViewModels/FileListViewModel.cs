@@ -53,34 +53,29 @@ namespace CANAnalyzerApp.ViewModels
                     MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFileError", ex.Message);
                 }
             });
-
-            DownloadFilesList(fileType);
         }
 
-        private void DownloadFilesList(SpyFileType fileType)
+        public async Task DownloadFilesList(SpyFileType fileType)
         {
             IsDownloading = true;
 
             List<string> fileNames = new List<string>();
 
-            Task.Run(async () =>
+            try
             {
-                try
-                {
-                    fileNames = await AnalyzerDevice.GetSpyFileNames(fileType);
+                fileNames = await AnalyzerDevice.GetSpyFileNames(fileType);
 
-                    foreach(string fileName in fileNames)
-                    {
-                        Files.Add(new SpyFile { FileName = fileName, ItemTappedCommand = downloadFileCommand });
-                    }
-                }
-                catch(Exception ex)
+                foreach (string fileName in fileNames)
                 {
-                    MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFilesListError", ex.Message);
+                    Files.Add(new SpyFile { FileName = fileName, ItemTappedCommand = downloadFileCommand });
                 }
+            }
+            catch (Exception ex)
+            {
+                MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFilesListError", ex.Message);
+            }
 
-                IsDownloading = false;
-            });
+            IsDownloading = false;
         }
     }
 }
