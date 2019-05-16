@@ -97,7 +97,7 @@ namespace CANAnalyzerApp.ViewModels
 
         public CANSpyViewModel(int line)
         {
-            if(line == 1)
+            if (line == 1)
                 Title = "CAN Line 1";
             else
                 Title = "CAN Line 2";
@@ -131,7 +131,8 @@ namespace CANAnalyzerApp.ViewModels
 
             lineNumber = line;
 
-            StartCommand = new Command(async () => {
+            StartCommand = new Command(async () =>
+            {
                 try
                 {
                     var param = new CANSpyParameters();
@@ -147,8 +148,6 @@ namespace CANAnalyzerApp.ViewModels
                     param.ApplyMask = ApplyMask;
                     param.Mask = Convert.ToUInt32(Mask, 16);
                     param.ID = Convert.ToUInt32(ID, 16);
-
-
 
                     if (lineNumber == 1)
                     {
@@ -167,7 +166,8 @@ namespace CANAnalyzerApp.ViewModels
                 }
             });
 
-            StopCommand = new Command(async () => {
+            StopCommand = new Command(async () =>
+            {
                 try
                 {
                     if (lineNumber == 1)
@@ -182,63 +182,4 @@ namespace CANAnalyzerApp.ViewModels
             });
         }
     }
-
-    // Questo da usare come esempio per gli ICommand in MVVM
-    /*
-     * 
-     * public class AboutViewModel : BaseViewModel
-    {
-        public AboutViewModel()
-        {
-            Title = "About";
-
-            OpenWebCommand = new Command(() => Device.OpenUri(new Uri("https://xamarin.com/platform")));
-        }
-
-        public ICommand OpenWebCommand { get; }
-    }
-    */
-
-    // Questo invece come esempio per restituire qualcosa da una modal, usando il messagging center
-    /*
-     * 
-     * 
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class NewItemPage : ContentPage
-    {
-        public Item Item { get; set; }
-
-        public NewItemPage()
-        {
-            InitializeComponent();
-
-            Item = new Item
-            {
-                Text = "Item name",
-                Description = "This is an item description."
-            };
-
-            BindingContext = this;
-        }
-
-        async void Save_Clicked(object sender, EventArgs e)
-        {
-            MessagingCenter.Send(this, "AddItem", Item);
-            await Navigation.PopModalAsync();
-        }
-
-        async void Cancel_Clicked(object sender, EventArgs e)
-        {
-            await Navigation.PopModalAsync();
-        }
-    }
-
-    // Poi nel costruttore del viewModel che vuole questo evento
-    MessagingCenter.Subscribe<NewItemPage, Item>(this, "AddItem", async (obj, item) =>
-    {
-        var newItem = item as Item;
-        Items.Add(newItem);
-        await DataStore.AddItemAsync(newItem);
-    });
-    */
 }

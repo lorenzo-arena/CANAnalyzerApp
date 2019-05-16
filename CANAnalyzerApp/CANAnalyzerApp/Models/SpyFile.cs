@@ -16,6 +16,8 @@ namespace CANAnalyzerApp.Models
     {
         public string FileName { get; set; }
 
+        public int FileSize { get; set; }
+
         public ICommand ItemTappedCommand { get; set; }
     }
 }

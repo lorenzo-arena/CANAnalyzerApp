@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:app="clr-namespace:CANAnalyzerApp"
+             xmlns:views="clr-namespace:CANAnalyzerApp.Views"
              x:Class="CANAnalyzerApp.Views.FileListPage">
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -12,6 +13,7 @@
             <Color x:Key="ForegroundDarkColor">#101010</Color>
             <Color x:Key="LogoColor">#DE0000</Color>
             <app:NegateBooleanConverter x:Key="Inverter"/>
+            <views:SizeIntToStringConverter x:Key="SizeConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
     <ContentPage.Content>
@@ -26,14 +28,15 @@
                       SelectionMode="None"
                       IsPullToRefreshEnabled="False"
                       ItemsSource="{Binding Files}"
-                      IsVisible="{Binding IsDownloading, Converter={StaticResource Inverter}}">
+                      IsVisible="{Binding IsDownloaded}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <!--Controllare se la modalità testo è compatibile-->
                         <!--con la selezione e il fire del command-->
                         <TextCell Text="{Binding FileName}"
                                   Command="{Binding ItemTappedCommand}"
-                                  CommandParameter="{Binding FileName}"/>
+                                  CommandParameter="{Binding FileName}"
+                                  Detail="{Binding FileSize, Converter={StaticResource SizeConverter}}"/>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

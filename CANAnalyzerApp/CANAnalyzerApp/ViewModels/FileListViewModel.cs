@@ -27,11 +27,20 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref isDownloading, value); }
         }
 
+        bool isDownloaded;
+        public bool IsDownloaded
+        {
+            get { return isDownloaded; }
+            set { SetProperty(ref isDownloaded, value); }
+        }
+
         private ICommand downloadFileCommand;
 
         public FileListViewModel(SpyFileType fileType)
         {
-            Files = new List<SpyFile>();
+            files = new List<SpyFile>();
+            isDownloading = false;
+            isDownloaded = false;
 
             downloadFileCommand = new Command<string>(async (fileName) => {
                 try
@@ -57,25 +66,43 @@ namespace CANAnalyzerApp.ViewModels
 
         public async Task DownloadFilesList(SpyFileType fileType)
         {
-            IsDownloading = true;
-
-            List<string> fileNames = new List<string>();
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                IsDownloading = true;
+            });
 
             try
             {
-                fileNames = await AnalyzerDevice.GetSpyFileNames(fileType);
+                var fileNum = await AnalyzerDevice.GetSpyFileNumber(fileType);
 
-                foreach (string fileName in fileNames)
+                if(fileNum > 0)
                 {
-                    Files.Add(new SpyFile { FileName = fileName, ItemTappedCommand = downloadFileCommand });
+                    var fileNames = await AnalyzerDevice.GetSpyFileNames(fileType);
+                    var fileSizes = await AnalyzerDevice.GetSpyFileSizes(fileType);
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        for (int fileIndex = 0; fileIndex < fileNum; fileIndex++)
+                        {
+                            Files.Add(new SpyFile { FileName = fileNames[fileIndex], FileSize = fileSizes[fileIndex], ItemTappedCommand = downloadFileCommand });
+                        }
+                    });
                 }
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    IsDownloaded = true;
+                });
             }
             catch (Exception ex)
             {
                 MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFilesListError", ex.Message);
             }
 
-            IsDownloading = false;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                IsDownloading = false;
+            });
         }
     }
 }

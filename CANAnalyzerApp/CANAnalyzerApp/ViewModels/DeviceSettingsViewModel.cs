@@ -55,8 +55,11 @@ namespace CANAnalyzerApp.ViewModels
             AppVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
 
             ConnectCommand = new Command(async () => {
-                IsConnecting = true;
-                IsConnected = false;
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    IsConnecting = true;
+                    IsConnected = false;
+                });
 
                 try
                 {
@@ -68,16 +71,19 @@ namespace CANAnalyzerApp.ViewModels
                 catch(Exception ex)
                 {
                     MessagingCenter.Send<DeviceSettingsViewModel, string>(this, "DeviceConnectedError", ex.Message);
-                } 
-
-                IsConnecting = false;
-                IsConnected = AnalyzerDevice.IsConnected();
-
-                if(IsConnected)
-                {
-                    SerialNumber = AnalyzerDevice.GetSerialNumber();
-                    FirmwareVersion = AnalyzerDevice.GetFirmwareVersion();
                 }
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    IsConnecting = false;
+                    IsConnected = AnalyzerDevice.IsConnected();
+
+                    if (IsConnected)
+                    {
+                        SerialNumber = AnalyzerDevice.GetSerialNumber();
+                        FirmwareVersion = AnalyzerDevice.GetFirmwareVersion();
+                    }
+                });
             });
         }
     }

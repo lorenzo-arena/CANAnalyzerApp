@@ -15,8 +15,9 @@ namespace CANAnalyzerApp.Views
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class FileListPage : ContentPage
 	{
-        FileListViewModel _viewModel;
-        SpyFileType _fileType;
+        private FileListViewModel _viewModel;
+        private SpyFileType _fileType;
+        private bool _isDataLoaded;
 
         public FileListPage()
         {
@@ -47,16 +48,61 @@ namespace CANAnalyzerApp.Views
             BindingContext = _viewModel;
 
             _fileType = fileType;
+            _isDataLoaded = false;
         }
 
         protected async override void OnAppearing()
         {
-            await _viewModel.DownloadFilesList(_fileType);
- 
-            // Faccio un taccone per adesso,
-            // dissocio e riassocio il BindingContext
-            BindingContext = null;
-            BindingContext = _viewModel;
+            if(!_isDataLoaded)
+            {
+                await _viewModel.DownloadFilesList(_fileType);
+
+                _isDataLoaded = true;
+            }
+        }
+    }
+
+    public class SizeIntToStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+
+            int absoluteValue = (((int)value < 0) ? -((int)value) : (int)value);
+
+            // Determino il suffisso
+            string suffix;
+            double readable;
+
+            if (absoluteValue >= 0x40000000) // Gigabyte
+            {
+                suffix = "GB";
+                readable = (int)value >> 20;
+            }
+            else if (absoluteValue >= 0x100000) // Megabyte
+            {
+                suffix = "MB";
+                readable = (int)value >> 10;
+            }
+            else if (absoluteValue >= 0x400) // Kilobyte
+            {
+                suffix = "KB";
+                readable = (int)value;
+            }
+            else
+            {
+                return ((int)value).ToString("0 B"); // Byte
+            }
+
+            // Divido per 1024 per ottenere i valori decimali
+            readable = (readable / 1024);
+
+            // Restituisco la stringa formattata
+            return readable.ToString("0.### ") + suffix;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            int result = 0;
+            return Int32.TryParse((string)value, out result) ? result : (int?)null;
         }
     }
 }

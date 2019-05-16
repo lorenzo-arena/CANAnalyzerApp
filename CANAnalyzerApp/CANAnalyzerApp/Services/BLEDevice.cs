@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CANAnalyzerApp.Models;
+using System.Linq;
 
 namespace CANAnalyzerApp.Services
 {
@@ -263,9 +264,31 @@ namespace CANAnalyzerApp.Services
             return await Task.FromResult(true);
         }
 
+        public async Task<int> GetSpyFileNumber(SpyFileType type)
+        {
+            var fileNames = new List<string>();
+
+            UInt32 getNumCommand;
+
+            if (type == SpyFileType.FileTypeCAN1)
+                getNumCommand = 0x00000003;
+            else if (type == SpyFileType.FileTypeCAN2)
+                getNumCommand = 0x00000004;
+            else if (type == SpyFileType.FileTypeK)
+                getNumCommand = 0x00000005;
+            else
+                throw new Exception("FileType not implemented!");
+
+            await SendReceiveInitCommand(4);
+            await SendCommand(getNumCommand);
+            var getNumResponse = await ReceiveFrame();
+
+            return (int)ArrConverter.GetUInt32FromBuffer(getNumResponse, 8);
+        }
+
         public async Task<List<string>> GetSpyFileNames(SpyFileType type)
         {
-            var files = new List<string>();
+            var fileNames = new List<string>();
 
             UInt32 getNumCommand;
             UInt32 getFileNameCommand;
@@ -304,10 +327,57 @@ namespace CANAnalyzerApp.Services
                 var getFileNameResponse = await ReceiveFrame();
 
                 var fileName = Encoding.ASCII.GetString(getFileNameResponse, 12, getFileNameResponse.Length - 16);
-                files.Add(fileName);
+                fileNames.Add(fileName);
             }
 
-            return files;
+            return fileNames;
+        }
+
+        public async Task<List<int>> GetSpyFileSizes(SpyFileType type)
+        {
+            var fileSizes = new List<int>();
+
+            UInt32 getNumCommand;
+            UInt32 getFileSizeCommand;
+
+            if (type == SpyFileType.FileTypeCAN1)
+            {
+                getNumCommand = 0x00000003;
+                getFileSizeCommand = 0x00000009;
+            }
+            else if (type == SpyFileType.FileTypeCAN2)
+            {
+                getNumCommand = 0x00000004;
+                getFileSizeCommand = 0x0000000A;
+            }
+            else if (type == SpyFileType.FileTypeK)
+            {
+                getNumCommand = 0x00000005;
+                getFileSizeCommand = 0x0000000B;
+            }
+            else
+                throw new Exception("FileType not implemented!");
+
+            await SendReceiveInitCommand(4);
+            await SendCommand(getNumCommand);
+            var getNumResponse = await ReceiveFrame();
+
+            var filesNum = ArrConverter.GetUInt32FromBuffer(getNumResponse, 8);
+
+            for (UInt32 fileIndex = 0; fileIndex < filesNum; fileIndex++)
+            {
+                var fileIndexBuf = new byte[4];
+                ArrConverter.SetBufferFromUInt32(fileIndex, fileIndexBuf, 0);
+
+                await SendReceiveInitCommand(8);
+                await SendCommandWithBuffer(getFileSizeCommand, fileIndexBuf);
+                var getFileSizeResponse = await ReceiveFrame();
+
+                UInt32 fileSize = ArrConverter.GetUInt32FromBuffer(getFileSizeResponse, 8);
+                fileSizes.Add((int)fileSize);
+            }
+
+            return fileSizes;
         }
 
         public async Task<byte[]> GetSpyFile(SpyFileType type, string fileName)
@@ -316,11 +386,11 @@ namespace CANAnalyzerApp.Services
             UInt32 getFileCommand;
 
             if (type == SpyFileType.FileTypeCAN1)
-                getFileCommand = 0x00000009;
+                getFileCommand = 0x0000000C;
             else if (type == SpyFileType.FileTypeCAN2)
-                getFileCommand = 0x0000000A;
+                getFileCommand = 0x0000000D;
             else if (type == SpyFileType.FileTypeK)
-                getFileCommand = 0x0000000B;
+                getFileCommand = 0x0000000E;
             else
                 throw new Exception("FileType not implemented!");
 
@@ -331,9 +401,11 @@ namespace CANAnalyzerApp.Services
 
             await SendReceiveInitCommand(4 + (UInt32)fileNameBuff.Length);
             await SendCommandWithBuffer(getFileCommand, fileNameBuff);
-            var response = await ReceiveFrame();
 
-            return response;
+            var fileBuff = await ReceiveFrame();
+            fileBuff = fileBuff.Skip(12).Take(fileBuff.Length - 16).ToArray();
+
+            return fileBuff;
         }
 
         public async Task<bool> TestCommandAsync()
