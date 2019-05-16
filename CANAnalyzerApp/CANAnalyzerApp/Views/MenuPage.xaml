@@ -11,6 +11,7 @@
               SeparatorVisibility="None"     
               HasUnevenRows="False"
               BackgroundColor="#282828"
+              IsPullToRefreshEnabled="False"
               RelativeLayout.XConstraint = "{ConstraintExpression 
                 Type=RelativeToParent,
                 Property=Width,
@@ -42,13 +43,14 @@
             </ListView.Header>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ViewCell>
-                        <StackLayout Padding="15,10" HorizontalOptions="FillAndExpand">
+                    <ViewCell IsEnabled="{Binding Enabled}">
+                        <StackLayout Padding="15,10"
+                                     HorizontalOptions="FillAndExpand">
                             <Label VerticalOptions="FillAndExpand" 
-                    VerticalTextAlignment="Center" 
-                    Text="{Binding Title}" 
-                    FontSize="20"
-                    TextColor="{Binding Foreground}"/>
+                                   VerticalTextAlignment="Center" 
+                                   Text="{Binding Title}" 
+                                   FontSize="20"
+                                   TextColor="{Binding Foreground}"/>
                         </StackLayout>
                     </ViewCell>
                 </DataTemplate>

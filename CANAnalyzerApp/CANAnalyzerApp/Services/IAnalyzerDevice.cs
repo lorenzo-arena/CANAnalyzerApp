@@ -28,6 +28,10 @@ namespace CANAnalyzerApp.Services
         Task<bool> SetKParametersAsync(SpyType type, KSpyParameters param);
         Task<bool> StartSpyAsync(SpyType type);
         Task<bool> StopSpyAsync(SpyType type);
+        Task<int> GetSpyFileNumber(SpyFileType type);
+        Task<List<string>> GetSpyFileNames(SpyFileType type);
+        Task<List<int>> GetSpyFileSizes(SpyFileType type);
+        Task<byte[]> GetSpyFile(SpyFileType type, string fileName);
     }
 }
  

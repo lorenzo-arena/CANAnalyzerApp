@@ -15,7 +15,7 @@
             <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
             <Color x:Key="ForegroundDarkColor">#101010</Color>
             <Color x:Key="LogoColor">#DE0000</Color>
-            <app:NegateBooleanConverter x:Key="inverter"/>
+            <app:NegateBooleanConverter x:Key="Inverter"/>
             <local:SettingsFromStringConverter x:Key="settingsStringConverter"/>
             <local:StatusStringFromBoolConverter x:Key="statusStringConverter"/>
             <local:StatusColorFromBoolConverter x:Key="statusColorConverter"/>
@@ -27,7 +27,7 @@
             <Button Margin="0,30,0,0"
                     Text="Connect Device"
                     Command="{Binding ConnectCommand}"
-                    IsEnabled="{Binding IsConnected, Converter={StaticResource inverter}}"/>
+                    IsEnabled="{Binding IsConnected, Converter={StaticResource Inverter}}"/>
             <ActivityIndicator IsVisible="{Binding IsConnecting}"
                                IsRunning="{Binding IsConnecting}"
                                Color="{StaticResource LogoColor}"/>

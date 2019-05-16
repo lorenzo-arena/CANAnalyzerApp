@@ -70,6 +70,18 @@ namespace CANAnalyzerApp.Views
                         break;
                     }
 
+                    case (int)MenuItemType.FileExplorer:
+                    {
+                        var ExplorerPage = new FileExplorerPage();
+                        ExplorerPage.Title = "File Explorer";
+
+                        var SettingsNavPage = new NavigationPage(ExplorerPage);
+                        SettingsNavPage.BarBackgroundColor = Color.FromHex("#282828");
+
+                        MenuPages.Add(id, SettingsNavPage);
+                        break;
+                    }
+
                     case (int)MenuItemType.BLETest:
                     {
                         var BLEPage = new BLETestPage();
