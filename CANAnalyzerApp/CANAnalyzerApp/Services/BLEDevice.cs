@@ -12,8 +12,15 @@ using System.Linq;
 
 namespace CANAnalyzerApp.Services
 {
+    
     public class BLEDevice : IAnalyzerDevice
     {
+        private struct Response
+        {
+            public UInt32 responseData;
+            public byte[] responseBuff;
+        }
+
         public static BLEDevice Instance { get; } = new BLEDevice();
 
         static BLEDevice()
@@ -177,17 +184,9 @@ namespace CANAnalyzerApp.Services
             ArrConverter.SetBufferFromUInt32((UInt32)param.ID, paramData, 20);
 
             if (type == SpyType.CANSpyOne)
-            {
-                await SendReceiveInitCommand((UInt32)(4 + paramData.Length));
-                await SendCommandWithBuffer(setParamCAN1Spy, paramData);
-                await ReceiveFrame();
-            }
+                await SendReceiveCommand(setParamCAN1Spy, paramData);
             else if (type == SpyType.CANSpyTwo)
-            {
-                await SendReceiveInitCommand((UInt32)(4 + paramData.Length));
-                await SendCommandWithBuffer(setParamCAN2Spy, paramData);
-                await ReceiveFrame();
-            }
+                await SendReceiveCommand(setParamCAN2Spy, paramData);
 
             return await Task.FromResult(true);
         }
@@ -203,17 +202,9 @@ namespace CANAnalyzerApp.Services
             const UInt32 startCAN2Spy = 0x00020001;
 
             if (type == SpyType.CANSpyOne)
-            {
-                await SendReceiveInitCommand(4);
-                await SendCommand(startCAN1Spy);
-                await ReceiveFrame();
-            }
+                await SendReceiveCommand(startCAN1Spy);
             else if (type == SpyType.CANSpyTwo)
-            {
-                await SendReceiveInitCommand(4);
-                await SendCommand(startCAN2Spy);
-                await ReceiveFrame();
-            }
+                await SendReceiveCommand(startCAN2Spy);
 
             return await Task.FromResult(true);
         }
@@ -224,41 +215,27 @@ namespace CANAnalyzerApp.Services
             const UInt32 stopCAN2Spy = 0x00010004;
 
             if (type == SpyType.CANSpyOne)
-            {
-                await SendReceiveInitCommand(4);
-                await SendCommand(stopCAN1Spy);
-                await ReceiveFrame();
-            }
+                await SendReceiveCommand(stopCAN1Spy);
             else if (type == SpyType.CANSpyTwo)
-            {
-                await SendReceiveInitCommand(4);
-                await SendCommand(stopCAN2Spy);
-                await ReceiveFrame();
-            }
+                await SendReceiveCommand(stopCAN2Spy);
 
             return await Task.FromResult(true);
         }
 
         public async Task<bool> GetDeviceInfo()
         {
-            byte[] res = null;
+            Response res;
 
             const UInt32 getSNCommand = 0x00000001;
+            res = await SendReceiveCommand(getSNCommand);
 
-            await SendReceiveInitCommand(4);
-            await SendCommand(getSNCommand);
-            res = await ReceiveFrame();
-
-            UInt32 serialNum = ArrConverter.GetUInt32FromBuffer(res, 8);
-            _serialNumber = serialNum.ToString("D8");
+            _serialNumber = res.responseData.ToString("D8");
 
             const UInt32 getFWVerCommand = 0x00000002;
-            await SendReceiveInitCommand(4);
-            await SendCommand(getFWVerCommand);
-            res = await ReceiveFrame();
+            res = await SendReceiveCommand(getFWVerCommand);
 
-            string majorVer = ArrConverter.GetUInt16FromBuffer(res, 8).ToString();
-            string minorVer = ArrConverter.GetUInt16FromBuffer(res, 10).ToString("D3");
+            string majorVer = (res.responseData >> 16).ToString();
+            string minorVer = (res.responseData & 0x0000FFFF).ToString("D3");
             _fwVersion = String.Format("{0}.{1}", majorVer, minorVer);
 
             return await Task.FromResult(true);
@@ -279,11 +256,9 @@ namespace CANAnalyzerApp.Services
             else
                 throw new Exception("FileType not implemented!");
 
-            await SendReceiveInitCommand(4);
-            await SendCommand(getNumCommand);
-            var getNumResponse = await ReceiveFrame();
+            var res = await SendReceiveCommand(getNumCommand);
 
-            return (int)ArrConverter.GetUInt32FromBuffer(getNumResponse, 8);
+            return (int)res.responseData;
         }
 
         public async Task<List<string>> GetSpyFileNames(SpyFileType type)
@@ -311,22 +286,18 @@ namespace CANAnalyzerApp.Services
             else
                 throw new Exception("FileType not implemented!");
 
-            await SendReceiveInitCommand(4);
-            await SendCommand(getNumCommand);
-            var getNumResponse = await ReceiveFrame();
+            var getNumResponse = await SendReceiveCommand(getNumCommand);
 
-            var filesNum = ArrConverter.GetUInt32FromBuffer(getNumResponse, 8);
+            var filesNum = getNumResponse.responseData;
 
             for(UInt32 fileIndex = 0; fileIndex < filesNum; fileIndex++)
             {
                 var fileIndexBuf = new byte[4];
                 ArrConverter.SetBufferFromUInt32(fileIndex, fileIndexBuf, 0);
 
-                await SendReceiveInitCommand(8);
-                await SendCommandWithBuffer(getFileNameCommand, fileIndexBuf);
-                var getFileNameResponse = await ReceiveFrame();
+                var getFileNameResponse = await SendReceiveCommand(getFileNameCommand, fileIndexBuf);
 
-                var fileName = Encoding.ASCII.GetString(getFileNameResponse, 12, getFileNameResponse.Length - 16);
+                var fileName = Encoding.ASCII.GetString(getFileNameResponse.responseBuff);
                 fileNames.Add(fileName);
             }
 
@@ -358,22 +329,18 @@ namespace CANAnalyzerApp.Services
             else
                 throw new Exception("FileType not implemented!");
 
-            await SendReceiveInitCommand(4);
-            await SendCommand(getNumCommand);
-            var getNumResponse = await ReceiveFrame();
+            var getNumResponse = await SendReceiveCommand(getNumCommand);
 
-            var filesNum = ArrConverter.GetUInt32FromBuffer(getNumResponse, 8);
+            var filesNum = getNumResponse.responseData;
 
             for (UInt32 fileIndex = 0; fileIndex < filesNum; fileIndex++)
             {
                 var fileIndexBuf = new byte[4];
                 ArrConverter.SetBufferFromUInt32(fileIndex, fileIndexBuf, 0);
 
-                await SendReceiveInitCommand(8);
-                await SendCommandWithBuffer(getFileSizeCommand, fileIndexBuf);
-                var getFileSizeResponse = await ReceiveFrame();
+                var getFileSizeResponse = await SendReceiveCommand(getFileSizeCommand, fileIndexBuf);
 
-                UInt32 fileSize = ArrConverter.GetUInt32FromBuffer(getFileSizeResponse, 8);
+                UInt32 fileSize = getFileSizeResponse.responseData;
                 fileSizes.Add((int)fileSize);
             }
 
@@ -399,13 +366,9 @@ namespace CANAnalyzerApp.Services
             else
                 throw new Exception("Nome del file troppo lungo!");
 
-            await SendReceiveInitCommand(4 + (UInt32)fileNameBuff.Length);
-            await SendCommandWithBuffer(getFileCommand, fileNameBuff);
+            var res = await SendReceiveCommand(getFileCommand, fileNameBuff);
 
-            var fileBuff = await ReceiveFrame();
-            fileBuff = fileBuff.Skip(12).Take(fileBuff.Length - 16).ToArray();
-
-            return fileBuff;
+            return res.responseBuff;
         }
 
         public async Task<bool> TestCommandAsync()
@@ -413,11 +376,7 @@ namespace CANAnalyzerApp.Services
             const UInt32 blinkCommand = 0x3F3F0000;
             const UInt32 sleepCommand = 0x3F3F0001;
 
-            await SendReceiveInitCommand(4);
-
-            //await SendCommand(blinkCommand);
-            await SendCommand(sleepCommand);
-            await ReceiveFrame();
+            await SendReceiveCommand(sleepCommand);
 
             return await Task.FromResult(true);
         }
@@ -425,7 +384,7 @@ namespace CANAnalyzerApp.Services
         // Invia il frame di start della comunicazione
         // indicando la lunghezza del frame successivo
         // compresi la dimensione dell'header e del CRC finale
-        public async Task<bool> SendReceiveInitCommand(UInt32 nextLength)
+        private async Task<bool> SendReceiveInitCommand(UInt32 nextLength)
         {
             if (!_isConnected)
                 return await Task.FromResult(false);
@@ -455,7 +414,53 @@ namespace CANAnalyzerApp.Services
             }
         }
 
-        public async Task<bool> SendCommand(UInt32 command)
+        private async Task<Response> SendReceiveCommand(UInt32 command)
+        {
+            await SendReceiveInitCommand(4);
+            await SendCommand(command);
+            var receivedBuff = await ReceiveFrame();
+
+            // La risposta è composta da:
+            // 1 - un marker (4 byte)
+            // 2 - il codice di errore (4 byte)
+            // 3 - un codice di risultato (4 byte)
+            // 4 - se necessario un buffer
+            // 5 - il crc del messaggio (4 byte)
+            var result = new Response();
+            result.responseData = ArrConverter.GetUInt32FromBuffer(receivedBuff, 8);
+
+            if (receivedBuff.Length > 16)
+                result.responseBuff = receivedBuff.Skip(12).Take(receivedBuff.Length - 16).ToArray();
+            else
+                result.responseBuff = null;
+
+            return result;
+        }
+
+        private async Task<Response> SendReceiveCommand(UInt32 command, byte[] buffer)
+        {
+            await SendReceiveInitCommand((UInt32)(4 + buffer.Length));
+            await SendCommandWithBuffer(command, buffer);
+            var receivedBuff = await ReceiveFrame();
+
+            // La risposta è composta da:
+            // 1 - un marker (4 byte)
+            // 2 - il codice di errore (4 byte)
+            // 3 - un codice di risultato (4 byte)
+            // 4 - se necessario un buffer
+            // 5 - il crc del messaggio (4 byte)
+            var result = new Response();
+            result.responseData = ArrConverter.GetUInt32FromBuffer(receivedBuff, 8);
+
+            if (receivedBuff.Length > 16)
+                result.responseBuff = receivedBuff.Skip(12).Take(receivedBuff.Length - 16).ToArray();
+            else
+                result.responseBuff = null;
+
+            return result;
+        }
+
+        private async Task<bool> SendCommand(UInt32 command)
         {
             if (!_isConnected)
                 return await Task.FromResult(false);
@@ -476,7 +481,7 @@ namespace CANAnalyzerApp.Services
             return await Task.FromResult(true);
         }
 
-        public async Task<bool> SendCommandWithBuffer(UInt32 command, byte[] buff)
+        private async Task<bool> SendCommandWithBuffer(UInt32 command, byte[] buff)
         {
             if (!_isConnected)
                 return await Task.FromResult(false);
@@ -498,7 +503,7 @@ namespace CANAnalyzerApp.Services
             return await Task.FromResult(true);
         }
 
-        public async Task<bool> SendFrame(byte[] frame)
+        private async Task<bool> SendFrame(byte[] frame)
         {
             if (!_isConnected)
                 return await Task.FromResult(false);
@@ -527,7 +532,7 @@ namespace CANAnalyzerApp.Services
             return await Task.FromResult(true);
         }
 
-        public async Task<byte[]> ReceiveFrame()
+        private async Task<byte[]> ReceiveFrame()
         {
             const UInt32 waitCommand = 0x00040000;
             const UInt32 packetCommand = 0x3F3F3F3F;
