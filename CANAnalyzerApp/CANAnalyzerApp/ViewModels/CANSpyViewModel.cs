@@ -91,6 +91,13 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref lineNumber, value); }
         }
 
+        bool isSpying;
+        public bool IsSpying
+        {
+            get { return isSpying; }
+            set { SetProperty(ref isSpying, value); }
+        }
+
         public ICommand StartCommand { get; }
 
         public ICommand StopCommand { get; }
@@ -131,6 +138,8 @@ namespace CANAnalyzerApp.ViewModels
 
             lineNumber = line;
 
+            isSpying = false;
+
             StartCommand = new Command(async () =>
             {
                 try
@@ -159,6 +168,11 @@ namespace CANAnalyzerApp.ViewModels
                         await AnalyzerDevice.SetCANParametersAsync(Services.SpyType.CANSpyTwo, param);
                         await AnalyzerDevice.StartSpyAsync(Services.SpyType.CANSpyTwo);
                     }
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        IsSpying = true;
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -174,6 +188,11 @@ namespace CANAnalyzerApp.ViewModels
                         await AnalyzerDevice.StopSpyAsync(Services.SpyType.CANSpyOne);
                     else if (lineNumber == 2)
                         await AnalyzerDevice.StopSpyAsync(Services.SpyType.CANSpyTwo);
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        IsSpying = false;
+                    });
                 }
                 catch (Exception ex)
                 {

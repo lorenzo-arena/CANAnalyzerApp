@@ -3,7 +3,6 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
             x:Class="CANAnalyzerApp.Views.CANSpyPage"
             xmlns:CANAnalyzerViews="clr-namespace:CANAnalyzerApp.Views"
-            xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
             Title="{Binding Title}"
             BackgroundColor="{StaticResource BackgroundColor}">
 

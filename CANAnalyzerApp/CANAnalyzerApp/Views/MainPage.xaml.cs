@@ -104,9 +104,9 @@ namespace CANAnalyzerApp.Views
 
                 if (Device.RuntimePlatform == Device.Android)
                     await Task.Delay(100);
-
-                IsPresented = false;
             }
+
+            IsPresented = false;
         }
     }
 }

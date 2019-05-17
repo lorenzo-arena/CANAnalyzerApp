@@ -2,7 +2,20 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CANAnalyzerApp.Views.SpyControlsPage"
+             xmlns:local="clr-namespace:CANAnalyzerApp.Views"
              Title="Controls">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!--Page Level Resources: Compatible with Xamarin Live Player -->
+            <Color x:Key="BackgroundColor">#282828</Color>
+            <Color x:Key="LightBackgroundColor">#858585</Color>
+            <Color x:Key="ForegroundLightColor">#F0F0F0</Color>
+            <Color x:Key="ForegroundDarkColor">#101010</Color>
+            <Color x:Key="LogoColor">#DE0000</Color>
+            <local:TextFromIsSpyingConverter x:Key="textIsSpyingConverter"/>
+            <local:ColorFromBoolConverter x:Key="colorIsSpyingConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <ContentPage.Content>
         <RelativeLayout>
             <Button Text="Start"
@@ -48,7 +61,42 @@
                    RelativeLayout.YConstraint = "{ConstraintExpression 
                    Type=RelativeToParent,
                    Property=Height,
-                   Factor=0.15}"
+                   Factor=0.13}"
+                   RelativeLayout.WidthConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Width,
+                   Factor=0.2}"
+                   RelativeLayout.HeightConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Height,
+                   Factor=0.05}"
+                   Text="Status:"></Label>
+            <Label RelativeLayout.XConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Width,
+                   Factor=0.3}"
+                   RelativeLayout.YConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Height,
+                   Factor=0.13}"
+                   RelativeLayout.WidthConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Width,
+                   Factor=0.1}"
+                   RelativeLayout.HeightConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Height,
+                   Factor=0.05}"
+                   Text="{Binding IsSpying, Converter={StaticResource Key=textIsSpyingConverter}}"
+                   TextColor="{Binding IsSpying, Converter={StaticResource Key=colorIsSpyingConverter}}"></Label>
+            <Label RelativeLayout.XConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Width,
+                   Factor=0.1}"
+                   RelativeLayout.YConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Height,
+                   Factor=0.21}"
                    RelativeLayout.WidthConstraint = "{ConstraintExpression 
                    Type=RelativeToParent,
                    Property=Width,
@@ -67,7 +115,7 @@
                     RelativeLayout.YConstraint = "{ConstraintExpression 
                     Type=RelativeToParent,
                     Property=Height,
-                    Factor=0.2}"
+                    Factor=0.26}"
                     RelativeLayout.WidthConstraint = "{ConstraintExpression 
                     Type=RelativeToParent,
                     Property=Width,
@@ -75,7 +123,7 @@
                     RelativeLayout.HeightConstraint = "{ConstraintExpression 
                     Type=RelativeToParent,
                     Property=Height,
-                    Factor=0.75}"></Editor>
+                    Factor=0.71}"></Editor>
         </RelativeLayout>
     </ContentPage.Content>
 </ContentPage>
