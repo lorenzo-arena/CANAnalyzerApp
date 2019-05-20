@@ -14,6 +14,7 @@
             <Color x:Key="LogoColor">#DE0000</Color>
             <local:TextFromIsSpyingConverter x:Key="textIsSpyingConverter"/>
             <local:ColorFromBoolConverter x:Key="colorIsSpyingConverter"/>
+            <local:CANMonitorStringFromBufferConverter x:Key="monitorStringFromBufferConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
     <ContentPage.Content>
@@ -107,7 +108,7 @@
                    Factor=0.05}"
                    Text="Line Monitor:"></Label>
             <Editor InputTransparent="True"
-                    Text=""
+                    Text="{Binding MonitorBuffer, Converter={StaticResource Key=monitorStringFromBufferConverter}}"
                     RelativeLayout.XConstraint = "{ConstraintExpression 
                     Type=RelativeToParent,
                     Property=Width,

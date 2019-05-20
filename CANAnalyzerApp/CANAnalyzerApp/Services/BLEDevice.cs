@@ -371,6 +371,24 @@ namespace CANAnalyzerApp.Services
             return res.responseBuff;
         }
 
+        public async Task<byte[]> GetSpyBuffer(SpyType type)
+        {
+            UInt32 getBufferCommand;
+
+            if (type == SpyType.CANSpyOne)
+                getBufferCommand = 0x00010004;
+            else if (type == SpyType.CANSpyTwo)
+                getBufferCommand = 0x00020004;
+            else if (type == SpyType.KLineSpy)
+                getBufferCommand = 0x00030004;
+            else
+                throw new Exception("FileType not implemented!");
+
+            var res = await SendReceiveCommand(getBufferCommand);
+
+            return res.responseBuff;
+        }
+
         public async Task<bool> TestCommandAsync()
         {
             const UInt32 blinkCommand = 0x3F3F0000;

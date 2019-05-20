@@ -32,6 +32,7 @@ namespace CANAnalyzerApp.Services
         Task<List<string>> GetSpyFileNames(SpyFileType type);
         Task<List<int>> GetSpyFileSizes(SpyFileType type);
         Task<byte[]> GetSpyFile(SpyFileType type, string fileName);
+        Task<byte[]> GetSpyBuffer(SpyType type);
     }
 }
  

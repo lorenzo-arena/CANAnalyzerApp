@@ -10,6 +10,8 @@ using CANAnalyzerApp.Views;
 using System.Collections.Generic;
 using System.Windows.Input;
 
+using System.Timers;
+
 namespace CANAnalyzerApp.ViewModels
 {
     public class CANSpyViewModel : BaseViewModel
@@ -102,6 +104,15 @@ namespace CANAnalyzerApp.ViewModels
 
         public ICommand StopCommand { get; }
 
+        private Timer requestBufferTimer;
+
+        List<CANSpyMessage> monitorBuffer;
+        public List<CANSpyMessage> MonitorBuffer
+        {
+            get { return monitorBuffer; }
+            set { SetProperty(ref monitorBuffer, value); }
+        }
+
         public CANSpyViewModel(int line)
         {
             if (line == 1)
@@ -140,6 +151,14 @@ namespace CANAnalyzerApp.ViewModels
 
             isSpying = false;
 
+            requestBufferTimer = new Timer(3000);
+            requestBufferTimer.Elapsed += UpdateMonitorBuffer;
+
+            requestBufferTimer.AutoReset = true;
+            requestBufferTimer.Enabled = false;
+
+            monitorBuffer = new List<CANSpyMessage>();
+
             StartCommand = new Command(async () =>
             {
                 try
@@ -173,6 +192,8 @@ namespace CANAnalyzerApp.ViewModels
                     {
                         IsSpying = true;
                     });
+
+                    requestBufferTimer.Enabled = true;
                 }
                 catch (Exception ex)
                 {
@@ -193,12 +214,30 @@ namespace CANAnalyzerApp.ViewModels
                     {
                         IsSpying = false;
                     });
+
+                    requestBufferTimer.Enabled = false;
                 }
                 catch (Exception ex)
                 {
                     MessagingCenter.Send<CANSpyViewModel, string>(this, "StopError", ex.Message);
                 }
             });
+        }
+
+        public async void UpdateMonitorBuffer(Object source, ElapsedEventArgs e)
+        {
+            try
+            {
+                var buff = await AnalyzerDevice.GetSpyBuffer((lineNumber == 1) ? Services.SpyType.CANSpyOne : Services.SpyType.CANSpyTwo);
+
+                var tempList = new List<CANSpyMessage>();
+            }
+            catch(Exception ex)
+            {
+                // OPS!
+                int pippo = 0;
+                pippo++;
+            }
         }
     }
 }
