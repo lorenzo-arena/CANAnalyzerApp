@@ -18,7 +18,7 @@
             <app:NegateBooleanConverter x:Key="Inverter"/>
             <local:SettingsFromStringConverter x:Key="settingsStringConverter"/>
             <local:StatusStringFromBoolConverter x:Key="statusStringConverter"/>
-            <local:StatusColorFromBoolConverter x:Key="statusColorConverter"/>
+            <local:ColorFromBoolConverter x:Key="statusColorConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 

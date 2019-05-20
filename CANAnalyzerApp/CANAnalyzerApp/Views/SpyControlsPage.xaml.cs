@@ -17,4 +17,22 @@ namespace CANAnalyzerApp.Views
 			InitializeComponent ();            
         }
 	}
+
+    public class TextFromIsSpyingConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((bool)value)
+                return "On";
+            else
+                return "Off";
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if ((string)value == "On")
+                return true;
+            else
+                return false;
+        }
+    }
 }

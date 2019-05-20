@@ -81,7 +81,7 @@ namespace CANAnalyzerApp.Views
         }
     }
 
-    public class StatusColorFromBoolConverter : IValueConverter
+    public class ColorFromBoolConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
