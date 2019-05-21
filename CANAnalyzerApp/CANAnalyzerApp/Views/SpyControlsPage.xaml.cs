@@ -48,29 +48,29 @@ namespace CANAnalyzerApp.Views
 
             foreach(Models.CANSpyMessage message in listBuff)
             {
-                if (message.isError)
+                if (message.IsError)
                 {
                     textBuff += "\tError Frame!\n";
                 }
                 else
                 {
-                    textBuff += message.id.ToString("X8");
+                    textBuff += message.Id.ToString("X8");
                     textBuff += " ";
-                    textBuff += message.data[0].ToString("X2");
+                    textBuff += message.Data[0].ToString("X2");
                     textBuff += " ";
-                    textBuff += message.data[1].ToString("X2");
+                    textBuff += message.Data[1].ToString("X2");
                     textBuff += " ";
-                    textBuff += message.data[2].ToString("X2");
+                    textBuff += message.Data[2].ToString("X2");
                     textBuff += " ";
-                    textBuff += message.data[3].ToString("X2");
+                    textBuff += message.Data[3].ToString("X2");
                     textBuff += " ";
-                    textBuff += message.data[4].ToString("X2");
+                    textBuff += message.Data[4].ToString("X2");
                     textBuff += " ";
-                    textBuff += message.data[5].ToString("X2");
+                    textBuff += message.Data[5].ToString("X2");
                     textBuff += " ";
-                    textBuff += message.data[6].ToString("X2");
+                    textBuff += message.Data[6].ToString("X2");
                     textBuff += " ";
-                    textBuff += message.data[7].ToString("X2");
+                    textBuff += message.Data[7].ToString("X2");
 
                     textBuff += "\n";
                 }

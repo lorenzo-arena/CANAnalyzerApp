@@ -8,14 +8,16 @@ namespace CANAnalyzerApp.Models
     {
         public UInt32 Time { get; set; } // utilizzare ?
 
-        public UInt32 id { get; set; }
+        public UInt32 Id { get; set; }
 
-        public byte dataSize { get; set; }
+        public byte DataSize { get; set; }
 
-        public bool isError { get; set; }
+        public bool IsError { get; set; }
 
-        public UInt32 errorCode { get; set; }
+        public UInt32 ErrorCode { get; set; }
 
-        public byte[] data { get; set; }
+        public byte[] Data { get; set; }
+
+        public static int StructSize = 24;
     }
 }
