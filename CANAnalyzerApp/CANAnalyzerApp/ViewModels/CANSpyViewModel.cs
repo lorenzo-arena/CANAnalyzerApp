@@ -10,6 +10,10 @@ using CANAnalyzerApp.Views;
 using System.Collections.Generic;
 using System.Windows.Input;
 
+using System.Timers;
+using CANAnalyzerApp.Services;
+using System.Linq;
+
 namespace CANAnalyzerApp.ViewModels
 {
     public class CANSpyViewModel : BaseViewModel
@@ -102,6 +106,15 @@ namespace CANAnalyzerApp.ViewModels
 
         public ICommand StopCommand { get; }
 
+        private Timer requestBufferTimer;
+
+        List<CANSpyMessage> monitorBuffer;
+        public List<CANSpyMessage> MonitorBuffer
+        {
+            get { return monitorBuffer; }
+            set { SetProperty(ref monitorBuffer, value); }
+        }
+
         public CANSpyViewModel(int line)
         {
             if (line == 1)
@@ -140,6 +153,14 @@ namespace CANAnalyzerApp.ViewModels
 
             isSpying = false;
 
+            requestBufferTimer = new Timer(5000);
+            requestBufferTimer.Elapsed += UpdateMonitorBuffer;
+
+            requestBufferTimer.AutoReset = true;
+            requestBufferTimer.Enabled = false;
+
+            MonitorBuffer = new List<CANSpyMessage>();
+
             StartCommand = new Command(async () =>
             {
                 try
@@ -173,6 +194,8 @@ namespace CANAnalyzerApp.ViewModels
                     {
                         IsSpying = true;
                     });
+
+                    requestBufferTimer.Enabled = true;
                 }
                 catch (Exception ex)
                 {
@@ -193,12 +216,53 @@ namespace CANAnalyzerApp.ViewModels
                     {
                         IsSpying = false;
                     });
+
+                    requestBufferTimer.Enabled = false;
                 }
                 catch (Exception ex)
                 {
                     MessagingCenter.Send<CANSpyViewModel, string>(this, "StopError", ex.Message);
                 }
             });
+        }
+
+        public async void UpdateMonitorBuffer(Object source, ElapsedEventArgs e)
+        {
+            try
+            {
+                // Fermo il timer
+                requestBufferTimer.Enabled = false;
+
+                var buff = await AnalyzerDevice.GetSpyBuffer((lineNumber == 1) ? Services.SpyType.CANSpyOne : Services.SpyType.CANSpyTwo);
+
+                var tempList = new List<CANSpyMessage>();               
+                for (int messageIndex = 0; messageIndex < buff.Length / CANSpyMessage.StructSize; messageIndex++)
+                {
+                    var message = new CANSpyMessage();
+                    message.Time = ArrConverter.STM32.GetUInt32FromBuffer(buff, messageIndex * CANSpyMessage.StructSize);
+                    message.Id = ArrConverter.STM32.GetUInt32FromBuffer(buff, (messageIndex * CANSpyMessage.StructSize) + 4);
+                    message.DataSize = buff[(messageIndex * CANSpyMessage.StructSize) + 10];
+                    message.IsError = buff[(messageIndex * CANSpyMessage.StructSize) + 11] != 0x00;
+                    message.ErrorCode = ArrConverter.STM32.GetUInt32FromBuffer(buff, (messageIndex * CANSpyMessage.StructSize) + 12);
+                    message.Data = new byte[8];
+                    buff.Skip((messageIndex * CANSpyMessage.StructSize) + 16).Take(8).ToArray().CopyTo(message.Data, 0);
+
+                    tempList.Add(message);                    
+                }
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    MonitorBuffer = new List<CANSpyMessage>(tempList);
+                });
+
+                // Riavvio il timer
+                requestBufferTimer.Enabled = true;
+            }
+            catch(Exception ex)
+            {
+                // Riavvio il timer
+                requestBufferTimer.Enabled = true;
+            }
         }
     }
 }

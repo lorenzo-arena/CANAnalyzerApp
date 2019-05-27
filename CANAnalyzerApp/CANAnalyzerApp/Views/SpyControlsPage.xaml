@@ -14,6 +14,7 @@
             <Color x:Key="LogoColor">#DE0000</Color>
             <local:TextFromIsSpyingConverter x:Key="textIsSpyingConverter"/>
             <local:ColorFromBoolConverter x:Key="colorIsSpyingConverter"/>
+            <local:CANMonitorStringFromBufferConverter x:Key="monitorStringFromBufferConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
     <ContentPage.Content>
@@ -106,24 +107,23 @@
                    Property=Height,
                    Factor=0.05}"
                    Text="Line Monitor:"></Label>
-            <Editor InputTransparent="True"
-                    Text=""
-                    RelativeLayout.XConstraint = "{ConstraintExpression 
-                    Type=RelativeToParent,
-                    Property=Width,
-                    Factor=0.1}"
-                    RelativeLayout.YConstraint = "{ConstraintExpression 
-                    Type=RelativeToParent,
-                    Property=Height,
-                    Factor=0.26}"
-                    RelativeLayout.WidthConstraint = "{ConstraintExpression 
-                    Type=RelativeToParent,
-                    Property=Width,
-                    Factor=0.8}"
-                    RelativeLayout.HeightConstraint = "{ConstraintExpression 
-                    Type=RelativeToParent,
-                    Property=Height,
-                    Factor=0.71}"></Editor>
+            <Label Text="{Binding MonitorBuffer, Converter={StaticResource Key=monitorStringFromBufferConverter}}"
+                   RelativeLayout.XConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Width,
+                   Factor=0.1}"
+                   RelativeLayout.YConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Height,
+                   Factor=0.26}"
+                   RelativeLayout.WidthConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Width,
+                   Factor=0.8}"
+                   RelativeLayout.HeightConstraint = "{ConstraintExpression 
+                   Type=RelativeToParent,
+                   Property=Height,
+                   Factor=0.71}"></Label>
         </RelativeLayout>
     </ContentPage.Content>
 </ContentPage>
