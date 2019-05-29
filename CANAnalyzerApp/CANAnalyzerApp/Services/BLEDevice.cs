@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CANAnalyzerApp.Models;
 using System.Linq;
+using Xamarin.Forms;
 
 namespace CANAnalyzerApp.Services
 {
@@ -652,6 +653,8 @@ namespace CANAnalyzerApp.Services
 
                                     // Copio partendo da 12 e poi in base alla dimensione dei pacchetti ricevuti
                                     Buffer.BlockCopy(_responseFrame, 0, fullRespose, receivedLength + 12, _responseFrame.Length);
+
+                                    MessagingCenter.Send<IAnalyzerDevice, double>(this, "DownloadFileProgress", (double)receivedLength / totalSize);
 
                                     receivedLength += _responseFrame.Length;
 

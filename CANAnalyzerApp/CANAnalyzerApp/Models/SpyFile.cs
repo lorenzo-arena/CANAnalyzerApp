@@ -19,5 +19,7 @@ namespace CANAnalyzerApp.Models
         public int FileSize { get; set; }
 
         public ICommand ItemTappedCommand { get; set; }
+
+        public bool IsDownloadingFile { get; set; }
     }
 }

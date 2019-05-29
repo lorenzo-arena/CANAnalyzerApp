@@ -18,9 +18,11 @@
     </ContentPage.Resources>
     <ContentPage.Content>
         <StackLayout>
+            <ProgressBar Progress="{Binding DownloadFileProgress}"
+                         ProgressColor="{StaticResource LogoColor}"/>
             <ActivityIndicator Margin="0,40,0,0"
-                               IsVisible="{Binding IsDownloading}"
-                               IsRunning="{Binding IsDownloading}"
+                               IsVisible="{Binding IsDownloadingList}"
+                               IsRunning="{Binding IsDownloadingList}"
                                Color="{StaticResource LogoColor}"/>
             <!--Controllare colori-->
             <ListView x:Name="ListViewMenu"
@@ -28,7 +30,7 @@
                       SelectionMode="None"
                       IsPullToRefreshEnabled="False"
                       ItemsSource="{Binding Files}"
-                      IsVisible="{Binding IsDownloaded}">
+                      IsVisible="{Binding IsDownloadedList}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <!--Controllare se la modalità testo è compatibile-->
@@ -36,7 +38,8 @@
                         <TextCell Text="{Binding FileName}"
                                   Command="{Binding ItemTappedCommand}"
                                   CommandParameter="{Binding FileName}"
-                                  Detail="{Binding FileSize, Converter={StaticResource SizeConverter}}"/>
+                                  Detail="{Binding FileSize, Converter={StaticResource SizeConverter}}"
+                                  IsEnabled="{Binding IsDownloadingFile, Converter={StaticResource Inverter}}"/>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
