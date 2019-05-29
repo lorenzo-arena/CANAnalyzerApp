@@ -554,6 +554,8 @@ namespace CANAnalyzerApp.Services
         {
             const UInt32 waitCommand = 0x00040000;
             const UInt32 packetCommand = 0x3F3F3F3F;
+            const UInt32 bigFileCommand = 0x3F3F0001;
+
             try
             {
                 if (!_isConnected)
@@ -626,6 +628,38 @@ namespace CANAnalyzerApp.Services
                                 }
 
                                 return await Task.FromResult(fullResponse);
+                            }
+                            else if(ArrConverter.GetUInt32FromBuffer(_responseFrame, 8) == bigFileCommand)
+                            {
+                                int totalSize = (int)ArrConverter.GetUInt32FromBuffer(_responseFrame, 12);
+                                int receivedLength = 0;
+
+                                // Alloco un buffer per l'intero file e il preambolo
+                                // Per adesso ignoro il preambolo e copio soltanto il buffer contenente il file
+                                byte[] fullRespose = new byte[totalSize + 16];
+
+                                // Il device cerca di trasmettere un pacchetto
+                                await _analyzerChar.StartUpdatesAsync();
+                                await SendCommand(packetCommand);
+
+                                while(receivedLength < totalSize)
+                                {
+                                    await Task.Delay(100);
+                                    await _analyzerChar.StopUpdatesAsync();
+
+                                    if (_responseFrame == null || _responseFrame.Length == 0)
+                                        throw new Exception("dimensione della risposta errata!");
+
+                                    // Copio partendo da 12 e poi in base alla dimensione dei pacchetti ricevuti
+                                    Buffer.BlockCopy(_responseFrame, 0, fullRespose, receivedLength + 12, _responseFrame.Length);
+
+                                    receivedLength += _responseFrame.Length;
+
+                                    await _analyzerChar.StartUpdatesAsync();
+                                    await SendCommand(packetCommand);
+                                }
+
+                                return await Task.FromResult(fullRespose);
                             }
                         }
 
