@@ -8,6 +8,7 @@ using CANAnalyzerApp.Models;
 using System.Threading.Tasks;
 using System.IO;
 using Xamarin.Essentials;
+using CANAnalyzerApp.Services;
 
 namespace CANAnalyzerApp.ViewModels
 {
@@ -20,18 +21,32 @@ namespace CANAnalyzerApp.ViewModels
             set { SetProperty(ref files, value); }
         }
 
-        bool isDownloading;
-        public bool IsDownloading
+        bool isDownloadingList;
+        public bool IsDownloadingList
         {
-            get { return isDownloading; }
-            set { SetProperty(ref isDownloading, value); }
+            get { return isDownloadingList; }
+            set { SetProperty(ref isDownloadingList, value); }
         }
 
-        bool isDownloaded;
-        public bool IsDownloaded
+        bool isDownloadingFile;
+        public bool IsDownloadingFile
         {
-            get { return isDownloaded; }
-            set { SetProperty(ref isDownloaded, value); }
+            get { return isDownloadingFile; }
+            set { SetProperty(ref isDownloadingFile, value); }
+        }
+
+        bool isDownloadedList;
+        public bool IsDownloadedList
+        {
+            get { return isDownloadedList; }
+            set { SetProperty(ref isDownloadedList, value); }
+        }
+
+        double downloadFileProgress;
+        public double DownloadFileProgress
+        {
+            get { return downloadFileProgress; }
+            set { SetProperty(ref downloadFileProgress, value); }
         }
 
         private ICommand downloadFileCommand;
@@ -39,12 +54,22 @@ namespace CANAnalyzerApp.ViewModels
         public FileListViewModel(SpyFileType fileType)
         {
             files = new List<SpyFile>();
-            isDownloading = false;
-            isDownloaded = false;
+            isDownloadingList = false;
+            isDownloadedList = false;
+            isDownloadingFile = false;
+            downloadFileProgress = 0;
 
             downloadFileCommand = new Command<string>(async (fileName) => {
                 try
                 {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        foreach (SpyFile file in Files)
+                            file.IsDownloadingFile = true;
+
+                        IsDownloadingFile = true;
+                    });
+
                     var fileContent = await AnalyzerDevice.GetSpyFile(fileType, fileName);
 
                     // Devo condividere fileContent, che sarà un byte[]
@@ -61,6 +86,24 @@ namespace CANAnalyzerApp.ViewModels
                 {
                     MessagingCenter.Send<FileListViewModel, string>(this, "DownloadFileError", ex.Message);
                 }
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    foreach (SpyFile file in Files)
+                        file.IsDownloadingFile = false;
+
+                    IsDownloadingFile = true;
+
+                    DownloadFileProgress = 0;
+                });
+            });
+
+            MessagingCenter.Subscribe<IAnalyzerDevice, double>(this, "DownloadFileProgress", (sender, progress) =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    DownloadFileProgress = progress;
+                });
             });
         }
 
@@ -68,7 +111,7 @@ namespace CANAnalyzerApp.ViewModels
         {
             Device.BeginInvokeOnMainThread(() =>
             {
-                IsDownloading = true;
+                IsDownloadingList = true;
             });
 
             try
@@ -84,14 +127,17 @@ namespace CANAnalyzerApp.ViewModels
                     {
                         for (int fileIndex = 0; fileIndex < fileNum; fileIndex++)
                         {
-                            Files.Add(new SpyFile { FileName = fileNames[fileIndex], FileSize = fileSizes[fileIndex], ItemTappedCommand = downloadFileCommand });
+                            Files.Add(new SpyFile { FileName = fileNames[fileIndex],
+                                                    FileSize = fileSizes[fileIndex],
+                                                    ItemTappedCommand = downloadFileCommand,
+                                                    IsDownloadingFile = false });
                         }
                     });
                 }
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    IsDownloaded = true;
+                    IsDownloadedList = true;
                 });
             }
             catch (Exception ex)
@@ -101,7 +147,7 @@ namespace CANAnalyzerApp.ViewModels
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                IsDownloading = false;
+                IsDownloadingList = false;
             });
         }
     }
